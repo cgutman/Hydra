@@ -29,7 +29,9 @@
 #
 # PCR structure:
 # 0x00 CPU number
-# 0x04 First thread on run queue 
+# 0x04 Current thread
+# 0x08 First thread on run queue
+# 0x0C Idle thread
 #
 
 # void krnl_create_init_thread()
@@ -45,7 +47,7 @@ krnl_create_init_thread:
 	addi $gp, $v0, 0x0
 
 	# Allocate the PCR
-	li $a0, 0x8
+	li $a0, 0x10
 	jal krnl_paged_alloc
 
 	# Write the PCR address
@@ -54,11 +56,20 @@ krnl_create_init_thread:
 	sw $v0, 0($t0)
 
 	# Initialize the PCR
+
+	# Write the CPU number
 	li $t0, 0x0 # FIXME: Hardcoded to CPU 0
-	sw $t0, 0($v0) # Write CPU number
+	sw $t0, 0($v0)
+
+	# Write this thread as the current thread and idle thread
 	li $t0, 0x4
 	add $t0, $v0, $t0
-	sw $gp, 0($t0) # Write us as the head of the process list
+	sw $gp, 0($t0)
+	sw $gp, 8($t0)
+
+	# No running thread head right now
+	li $t1, 0x0
+	sw $t1, 4($t0)
 
 	# Write the starting address
 	li $t0, 0x6C
@@ -195,15 +206,14 @@ krnl_create_thread:
 	sw $t1, 0($t0)
 
 	# Link us into the list
-	li $t0, 0x04
-	add $t0, $t0, $t1
-	lw $t2, 0($t0)
 
-	li $t3, 0x70
-	add $t3, $t3, $gp
+	addi $t0, $t1, 0x08
+	lw $t2, 0($t0) # Load the current head in $t2
 
-	sw $t2, 0($t3) # Link the head thread to us
-	sw $gp, 0($t0) # Link us to the head
+	addi $t3, $gp, 0x70
+	sw $t2, 0($t3) # Store the current head into the next thread entry
+
+	sw $gp, 0($t0) # Store the current thread into the PCR's thread list head
 
 	# Write the starting address
 	li $t0, 0x6C
@@ -233,7 +243,6 @@ krnl_create_thread:
 	jal krnl_unfreeze_thread
 
 krnl_schedule_new_thread:
-
 	# Get the current thread
 	addi $t0, $gp, 0x0
 
@@ -250,15 +259,15 @@ schedloop:
 	j testforblocked
 
 cyclethreads:
-	# Check if we've already cycled
-	bne $t5, $zero, idle
-
 	# Load the PCR
 	addi $t3, $gp, 0x74
 	lw $t4, 0($t3)
 
+	# Check if we've already cycled
+	bne $t5, $zero, idle
+
 	# Grab the head of the list
-	addi $t4, $t4, 0x4
+	addi $t4, $t4, 0x8
 	lw $t0, 0($t4)
 
 	# Store that we've cycled before
@@ -271,13 +280,18 @@ testforblocked:
 	bne $t2, $zero, schedloop
 
 	# Switch to new thread
-	addi $gp, $t1, 0x0
+	addi $gp, $t0, 0x0
 
 	# Resume it
 	j krnl_unfreeze_thread
 
 idle:
-	j idle
+	# Load the idle thread (PCR is in $t4)
+	addi $t4, $t4, 0x0C
+	lw $gp, 0($t4)
+
+	# Unfreeze the idle thread
+	j krnl_unfreeze_thread
 
 krnl_sleep_thread:
 	# Save the assembler temp

@@ -14,4 +14,4 @@ krnl_disable_interrupts:
 # void krnl_restore_interrupts(int)
 krnl_restore_interrupts:
 	# TODO: Implement me
-	j krnl_sleep_thread
+	jr $ra # Return

@@ -19,7 +19,6 @@
 # Cameron Gutman
 #
 
-
 # void krnl_spinlock_acquire(int* spinlock)
 krnl_spinlock_acquire:
 
@@ -48,8 +47,8 @@ krnl_spinlock_acquire:
 		li $t0, 0x1 # Generate the final spinlock value
 		sw $t0, 0($s0) # Acquire the spinlock by writing 1 to it
 
-#		addi $a0, $v0, 0x0 # Load krnl_disable_interrupts return value as parameter 0
-#		jal krnl_restore_interrupts # Restore interrupts to allow preemption again
+		addi $a0, $v0, 0x0 # Load krnl_disable_interrupts return value as parameter 0
+		jal krnl_restore_interrupts # Restore interrupts to allow preemption again
 
 		# Pop the return address off the stack
 		lw $ra, 0($sp)
