@@ -23,65 +23,42 @@
 # 0x70 Next thread on run queue
 # 0x74 PCR pointer
 # 0x78 Wait object pointer
-# 0x8C Stack
-# 0x100 Next thread in wait entry
-# 0x104 End
-#
-# PCR structure:
-# 0x00 CPU number
-# 0x04 Current thread
-# 0x08 First thread on run queue
-# 0x0C Idle thread
+# 0x7C Next thread in wait entry
+# 0x80 Stack
+# 0x100 End
 #
 
-# void krnl_create_init_thread()
+
+# void krnl_create_init_thread(void* pcr)
 krnl_create_init_thread:
 	# Save the starting address
 	addi $s0, $ra, 0x0
 
-	# Allocate the thread context
-	li $a0, 0x104
-	jal krnl_paged_alloc
+	# Save the PCR address
+	addi $s1, $a0, 0x0
+
+	# Allocate the thread context (minus stack)
+	li $a0, 0x80
+	jal krnl_mmregion_alloc
+	beq $v0, $zero, initthreadfailed
 
 	# Load the thread context
 	addi $gp, $v0, 0x0
 
-	# Allocate the PCR
-	li $a0, 0x10
-	jal krnl_paged_alloc
-
 	# Write the PCR address
 	li $t0, 0x74
 	add $t0, $t0, $gp
-	sw $v0, 0($t0)
-
-	# Initialize the PCR
-
-	# Write the CPU number
-	li $t0, 0x0 # FIXME: Hardcoded to CPU 0
-	sw $t0, 0($v0)
-
-	# Write this thread as the current thread and idle thread
-	li $t0, 0x4
-	add $t0, $v0, $t0
-	sw $gp, 0($t0)
-	sw $gp, 8($t0)
-
-	# No running thread head right now
-	li $t1, 0x0
-	sw $t1, 4($t0)
+	sw $s1, 0($t0)
 
 	# Write the starting address
 	li $t0, 0x6C
 	add $t0, $t0, $gp
 	sw $s0, 0($t0)
 
-	# Write the stack address
-	li $t0, 0x8C
-	add $t1, $t0, $gp
+	# Write the stack address (already setup)
 	li $t0, 0x64
 	add $t0, $t0, $gp
-	sw $t1, 0($t0)
+	sw $sp, 0($t0)
 
 	# Write the wait object pointer
 	li $t0, 0x0
@@ -91,7 +68,7 @@ krnl_create_init_thread:
 
 	# Write the wait queue entry
 	li $t0, 0x0
-	li $t1, 0x100
+	li $t1, 0x7C
 	add $t1, $t1, $gp
 	sw $t0, 0($t1)
 
@@ -103,6 +80,9 @@ krnl_create_init_thread:
 
 	# Unfreeze the thread
 	jal krnl_unfreeze_thread
+
+initthreadfailed:
+	jal krnl_fubar # Panic
 
 # void krnl_create_thread(void* starting_address)
 krnl_create_thread:
@@ -221,7 +201,7 @@ krnl_create_thread:
 	sw $s0, 0($t0)
 
 	# Write the stack address
-	li $t0, 0x8C
+	li $t0, 0x80
 	add $t1, $t0, $gp
 	li $t0, 0x64
 	add $t0, $t0, $gp
@@ -235,7 +215,7 @@ krnl_create_thread:
 
 	# Write the wait queue entry
 	li $t0, 0x0
-	li $t1, 0x100
+	li $t1, 0x7C
 	add $t1, $t1, $gp
 	sw $t0, 0($t1)
 

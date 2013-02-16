@@ -32,6 +32,9 @@ file_004=.
 file_005=.
 file_006=.
 file_007=.
+file_008=.
+file_009=.
+file_010=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -41,6 +44,9 @@ file_004=no
 file_005=no
 file_006=no
 file_007=no
+file_008=no
+file_009=no
+file_010=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -50,6 +56,9 @@ file_004=no
 file_005=no
 file_006=no
 file_007=no
+file_008=no
+file_009=no
+file_010=no
 [FILE_INFO]
 file_000=spinlock.s
 file_001=interrupt.s
@@ -59,6 +68,9 @@ file_004=main.s
 file_005=init.s
 file_006=mutex.s
 file_007=event.s
+file_008=fubar.s
+file_009=mmregion.s
+file_010=pcr.s
 [SUITE_INFO]
 suite_guid={14495C23-81F8-43F3-8A44-859C583D7760}
 suite_state=

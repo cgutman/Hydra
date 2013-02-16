@@ -8,7 +8,7 @@ main:
 	jal krnl_init
 
 	# Initialize the mutex
-	li $a0, 0xA0000300
+	li $a0, 0x80004000
 	jal krnl_mutex_init
 
 	# Start a new thread
@@ -29,27 +29,37 @@ test1:
 	la $a0, test2
 	jal krnl_create_thread
 
-	li $a0, 0x0
+	# Spawn a third thread
+	la $a0, test2
+	jal krnl_create_thread
+
+	# Spawn a fourth thread
+	la $a0, test2
+	jal krnl_create_thread
+
+	li $a1, 0x0
 
 	t1:
-		li $a0, 0xA0000300
+		li $a0, 0x80004000
 		jal krnl_mutex_acquire
 
-		addi $a0, $a0, 0x1
+		addi $a1, $a1, 0x1
 
 		jal krnl_sleep_thread
 
-		addi $a0, $a0, 0x1
+		addi $a1, $a1, 0x1
 
-		li $a0, 0xA0000300
+		li $a0, 0x80004000
 		jal krnl_mutex_release
 
 		j t1
 
 test2:
+	# Spawn a third thread
+
 	li $a1, 0x0
 	t2:
-		li $a0, 0xA0000300
+		li $a0, 0x80004000
 		jal krnl_mutex_acquire
 
 		addi $a1, $a1, 0x1
@@ -58,7 +68,7 @@ test2:
 
 		addi $a1, $a1, 0x1
 
-		li $a0, 0xA0000300
+		li $a0, 0x80004000
 		jal krnl_mutex_release
 
 		j t2

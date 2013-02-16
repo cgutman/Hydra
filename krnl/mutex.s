@@ -39,7 +39,7 @@ krnl_mutex_acquire:
 	lw $t2, 4($s0)
 
 	# Write the head of the waiter list to our next waiter entry
-	addi $t3, $gp, 0x100
+	addi $t3, $gp, 0x7C
 	sw $t2, 0($t3)
 
 	# Write our thread to the head of the waiter list
@@ -102,7 +102,7 @@ mutexhandoff:
 	sw $zero, 0($t2)
 
 	# Move the next thread in wait queue to the waiter list head
-	addi $t2, $t1, 0x100
+	addi $t2, $t1, 0x7C
 	lw $t3, 0($t2) # Load it from the next thread
 	sw $t3, 4($a0) # Store it to the mutex
 	sw $zero, 0($t2) # Clear it from the next thread
@@ -122,7 +122,7 @@ krnl_mutex_init:
 	sw $zero, 4($a0) # Initialize next waiter to 0
 	jr $ra # Return
 
-# void krnl_mutex_is_locked(int* mutex)
+# int krnl_mutex_is_locked(int* mutex)
 krnl_mutex_is_locked:
 	lw $t1, 0($a0) # Load the current holding thread
 	bne $t1, $zero, acquired # Check if somebody owns it
