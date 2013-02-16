@@ -59,9 +59,6 @@ test2:
 		addi $a1, $a1, 0x1
 
 		li $a0, 0xA0000300
-		jal krnl_mutex_acquire
-
-		li $a0, 0xA0000300
 		jal krnl_mutex_release
 
 		j t2

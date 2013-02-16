@@ -1,6 +1,7 @@
 .globl krnl_mutex_acquire
 .globl krnl_mutex_release
 .globl krnl_mutex_init
+.globl krnl_mutex_is_locked
 
 .data
 
@@ -120,4 +121,16 @@ krnl_mutex_init:
 	sw $zero, 0($a0) # Initialize the lock to 0 (unacquired)
 	sw $zero, 4($a0) # Initialize next waiter to 0
 	jr $ra # Return
-	
+
+# void krnl_mutex_is_locked(int* mutex)
+krnl_mutex_is_locked:
+	lw $t1, 0($a0) # Load the current holding thread
+	bne $t1, $zero, acquired # Check if somebody owns it
+
+	notacquired:
+		li $v0, 0x0 # Return 0x0 for not acquired
+		jr $ra
+
+	acquired:
+		li $v0, 0x1 # Return 0x1 for acquired
+		jr $ra
