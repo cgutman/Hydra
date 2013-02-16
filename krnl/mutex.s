@@ -38,13 +38,30 @@ krnl_mutex_acquire:
 	# Get the head of the waiter list
 	lw $t2, 4($s0)
 
-	# Write the head of the waiter list to our next waiter entry
-	addi $t3, $gp, 0x7C
-	sw $t2, 0($t3)
+	# Check if anyone is waiting already
+	beq $t2, $zero, firstwaiter
 
-	# Write our thread to the head of the waiter list
+acquireloop:
+	# Read this thread's next waiter entry
+	addi $t0, $t2, 0x7C
+	lw $t2, 0($t0)
+
+	# Check if we've reached the end of the linked list
+	beq $t2, $zero, foundend
+
+	# Continue traversing the linked list
+	j acquireloop
+
+firstwaiter:
+	# We're the head of the list
 	sw $gp, 4($s0)
+	j waitforacquire
 
+foundend:
+	# We're at the end ($t0 contains the address of the empty entry)
+	sw $gp, 0($t0)
+
+waitforacquire:
 	addi $a0, $v0, 0x0 # Load krnl_disable_interrupts return value as parameter 0
 	jal krnl_restore_interrupts # Restore interrupts before waiting
 
