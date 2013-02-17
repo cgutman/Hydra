@@ -201,7 +201,7 @@ krnl_create_thread:
 	sw $s0, 0($t0)
 
 	# Write the stack address
-	li $t0, 0x80
+	li $t0, 0x100
 	add $t1, $t0, $gp
 	li $t0, 0x64
 	add $t0, $t0, $gp

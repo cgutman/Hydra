@@ -23,13 +23,13 @@
 krnl_spinlock_acquire:
 
 	# Save s0
-	addi $sp, $sp, 0x4
+	addi $sp, $sp, -0x4
 	sw $s0, 0($sp)
 
 	addi $s0, $a0, 0x0 # Save the spinlock pointer
 
 	# Push the return address onto the stack
-	addi $sp, $sp, 0x4
+	addi $sp, $sp, -0x4
 	sw $ra, 0($sp)
 
 	spinloop:
@@ -52,11 +52,11 @@ krnl_spinlock_acquire:
 
 		# Pop the return address off the stack
 		lw $ra, 0($sp)
-		addi $sp, $sp, -0x4
+		addi $sp, $sp, 0x4
 
 		# Restore s0
 		lw $s0, 0($sp)
-		addi $sp, $sp, -0x4
+		addi $sp, $sp, 0x4
 
 		jr $ra # Return holding the lock
 

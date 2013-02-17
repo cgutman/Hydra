@@ -33,11 +33,11 @@ krnl_paged_alloc:
 # void* krnl_npaged_alloc(int size)
 krnl_npaged_alloc:
 	# Push the return value on stack
-	addi $sp, $sp, 0x4
+	addi $sp, $sp, -0x4
 	sw $ra, 0($sp)
 
 	# Save s0
-	addi $sp, $sp, 0x4
+	addi $sp, $sp, -0x4
 	sw $s0, 0($sp)
 
 	addi $s0, $a0, 0x0 # Store the size into a saved temp
@@ -75,11 +75,11 @@ allocfailed:
 finishalloc:
 	# Restore $s0
 	lw $s0, 0($sp)
-	addi $sp, $sp, -0x4
+	addi $sp, $sp, 0x4
 
 	# Pop $ra off stack
 	lw $ra, 0($sp)
-	addi $sp, $sp, -0x4
+	addi $sp, $sp, 0x4
 
 	jr $ra # Return the pointer to newly allocated memory
 

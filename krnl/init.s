@@ -26,10 +26,10 @@ krnl_init:
 	beq $v0, $zero, initfailed # Check for allocation failure
 
 	# Setup init thread's stack (destroys existing stack but doesn't matter)
-	addi $sp, $v0, 0x0
+	addi $sp, $v0, 0x20
 
 	# Push the return address onto the new stack so it is saved until after thread creation
-	addi $sp, $sp, 0x4
+	addi $sp, $sp, -0x4
 	sw $s0, 0($sp)
 
 	# Create this CPU's PCR
@@ -46,7 +46,7 @@ krnl_init:
 
 	# Restore the return location
 	lw $ra, 0($sp)
-	addi $sp, $sp, -0x4
+	addi $sp, $sp, 0x4
 
 	# Return to the idle thread
 	jr $ra

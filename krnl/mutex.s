@@ -15,13 +15,13 @@
 krnl_mutex_acquire:
 
 	# Save s0
-	addi $sp, $sp, 0x4
+	addi $sp, $sp, -0x4
 	sw $s0, 0($sp)
 
 	addi $s0, $a0, 0x0 # Save the mutex pointer
 
 	# Push the return address onto the stack
-	addi $sp, $sp, 0x4
+	addi $sp, $sp, -0x4
 	sw $ra, 0($sp)
 
 	jal krnl_disable_interrupts # Disable interrupts to prevent races (v0 gets interrupt state)
@@ -79,18 +79,18 @@ noncontendedacquire:
 finalizeacquire:
 	# Pop the return address off the stack
 	lw $ra, 0($sp)
-	addi $sp, $sp, -0x4
+	addi $sp, $sp, 0x4
 
 	# Restore s0
 	lw $s0, 0($sp)
-	addi $sp, $sp, -0x4
+	addi $sp, $sp, 0x4
 
 	jr $ra # Return holding the lock
 
 # void krnl_mutex_release(int* mutex)
 krnl_mutex_release:
 	# Push the return address onto the stack
-	addi $sp, $sp, 0x4
+	addi $sp, $sp, -0x4
 	sw $ra, 0($sp)
 
 	jal krnl_disable_interrupts # Disable interrupts to prevent races (v0 gets interrupt state)
@@ -107,7 +107,7 @@ krnl_mutex_release:
 finalizerelease:
 	# Pop the return address off the stack
 	lw $ra, 0($sp)
-	addi $sp, $sp, -0x4
+	addi $sp, $sp, 0x4
 
 	jr $ra # Return after releasing the lock
 

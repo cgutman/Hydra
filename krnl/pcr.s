@@ -15,7 +15,7 @@
 # void* krnl_pcr_alloc()
 krnl_pcr_alloc:
 	# Save the return address
-	addi $sp, $sp, 0x4
+	addi $sp, $sp, -0x4
 	sw $ra, 0($sp)
 
 	# Allocate the PCR
@@ -44,7 +44,7 @@ krnl_pcr_alloc:
 cleanup:
 	# Restore the return address
 	lw $ra, 0($sp)
-	addi $sp, $sp, -0x4
+	addi $sp, $sp, 0x4
 
 	# Return
 	jr $ra
