@@ -28,18 +28,15 @@ krnl_pcr_alloc:
 	sw $t0, 0($v0)
 
 	# Write this thread as the current thread and idle thread
-	li $t0, 0x4
-	add $t0, $v0, $t0
-	sw $k1, 0($t0)
-	sw $k1, 8($t0)
+	sw $k1, 0x04($v0)
+	sw $k1, 0x0C($v0)
 
 	# No running thread head right now
-	li $t1, 0x0
-	sw $t1, 4($t0)
+	sw $zero, 0x08($v0)
 
 	# All interrupts are enabled
 	li $t1, 0xFFFFFFFF
-	sw $t1, 0xC($t0)
+	sw $t1, 0x10($v0)
 
 cleanup:
 	# Restore the return address

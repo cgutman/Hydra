@@ -135,57 +135,36 @@ krnl_create_thread:
 	addi $t2, $k1, 0x0
 
 	# Read the PCR address from the old thread
-	li $t0, 0x74
-	add $t0, $t0, $k1
-	lw $t1, 0($t0)
+	lw $t1, 0x74($k1)
 
 	# Load the thread context
 	addi $k1, $v0, 0x0
 
 	# Restore the PCR address pointer
-	li $t0, 0x74
-	add $t0, $t0, $k1
-	sw $t1, 0($t0)
+	sw $t1, 0x74($k1)
 
 	# Link us into the list
-
-	addi $t0, $t1, 0x08
-	lw $t2, 0($t0) # Load the current head in $t2
-
-	addi $t3, $k1, 0x70
-	sw $t2, 0($t3) # Store the current head into the next thread entry
-
-	sw $k1, 0($t0) # Store the current thread into the PCR's thread list head
+	lw $t2, 0x08($t1) # Load the current head in $t2
+	sw $t2, 0x70($k1) # Store the current head into the next thread entry
+	sw $k1, 0x08($t1) # Store the current thread into the PCR's thread list head
 
 	# Write arguments into the new thread
-	addi $t0, $k1, 0x0C
-	sw $s1, 0($t0)
-	sw $s2, 4($t0)
-	sw $s3, 8($t0)
+	sw $s1, 0x0C($k1)
+	sw $s2, 0x10($k1)
+	sw $s3, 0x14($k1)
 
 	# Write the starting address
-	li $t0, 0x6C
-	add $t0, $t0, $k1
-	sw $s0, 0($t0)
+	sw $s0, 0x6C($k1)
 
 	# Write the stack address
-	li $t0, 0x180
-	add $t1, $t0, $k1
-	li $t0, 0x64
-	add $t0, $t0, $k1
-	sw $t1, 0($t0)
+	addi $t1, $k1, 0x180
+	sw $t1, 0x64($k1)
 
 	# Write the wait object pointer
-	li $t0, 0x0
-	li $t1, 0x78
-	add $t1, $t1, $k1
-	sw $t0, 0($t1)
+	sw $zero, 0x78($k1)
 
 	# Write the wait queue entry
-	li $t0, 0x0
-	li $t1, 0x7C
-	add $t1, $t1, $k1
-	sw $t0, 0($t1)
+	sw $zero, 0x7C($k1)
 
 	# Unfreeze the thread
 	jal krnl_unfreeze_thread
@@ -199,32 +178,27 @@ krnl_schedule_new_thread:
 
 schedloop:
 	# Get the next thread
-	addi $t0, $t0, 0x70
-	lw $t0, 0($t0)
+	lw $t0, 0x70($t0)
 
 	# Check if this is the last thread
-	beq $t0, $zero, cyclethreads
-	j testforblocked
+	bne $t0, $zero, testforblocked
 
 cyclethreads:
 	# Load the PCR
-	addi $t3, $k1, 0x74
-	lw $t4, 0($t3)
+	lw $t4, 0x74($k1)
 
 	# Check if we've already cycled
 	bne $t5, $zero, idle
 
 	# Grab the head of the list
-	addi $t4, $t4, 0x8
-	lw $t0, 0($t4)
+	lw $t0, 0x8($t4)
 
 	# Store that we've cycled before
 	addi $t5, $zero, 0x1
 
 testforblocked:
 	# Check if the thread is blocked
-	addi $t1, $t0, 0x78
-	lw $t2, 0($t1)
+	lw $t2, 0x78($t0)
 	bne $t2, $zero, schedloop
 
 	# Switch to new thread
@@ -235,8 +209,7 @@ testforblocked:
 
 idle:
 	# Load the idle thread (PCR is in $t4)
-	addi $t4, $t4, 0x0C
-	lw $k1, 0($t4)
+	lw $k1, 0x0C($t4)
 
 	# Unfreeze the idle thread
 	j krnl_unfreeze_thread
