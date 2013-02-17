@@ -6,19 +6,31 @@
 
 #
 # Kernel memory layout:
-# 0x80000000 - 0x80001FFF  Kernel region allocator zone (early-boot)
-# 0x80002000               Simple Mm's mutex
-# 0x80002008               Simple Mm's next pointer
-# 0x8000200C - 0x80007FFF  Simple Mm's allocator zone
+# 0x80000000 - 0x800000FF  Kernel context (reserved)
+# 0x80000100 - 0x80000FFF  Region allocator zone
+# 0x80001000 - 0x80007FFF  Simple Mm's allocator zone
 #
+# Kernel context (stored in $k0):
+#
+# 0x00 - Interrupt vector table
+# 0x20 - Region allocator next pointer
+# 0x24 - Region allocator upper bound
+# 0x28 - Memory manager mutex (8 bytes)
+# 0x30 - Memory manager next pointer
+# 0x34 - Memory manager upper bound
+# 
 
 # void krnl_init()
 krnl_init:
 	# Save the return location (destroys $s0 but that doesn't matter)
 	addi $s0, $ra, 0x0
 
+	# Setup the kernel context
+	li $k0, 0x80000000
+
 	# Initialize the early boot memory manager
 	jal krnl_mmregion_init
+	bne $v0, $zero, initfailed # Check for init failure
 
 	# Allocate some stack for the initial system thread
 	li $a0, 0x100 # 256 bytes should do
