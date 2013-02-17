@@ -10,28 +10,33 @@ krnl_return_to_epc:
 	lw $t0, 0($sp)
 	lw $t1, 4($sp)
 	lw $t2, 8($sp)
-	addi $sp, $sp, 0xC
+	lw $a0, 12($sp)
+	addi $sp, $sp, 0x10
 
-	mfc0 $k1, $14 # Get EPC
-	jr $k1 # replace PC with the return address
+	eret # Return to EPC
 
 krnl_return_to_epc_next:
+
+	mfc0 $t0, $14 # Get EPC
+	addiu $t0, 0x4 # Next instruction
+	mtc0 $t0, $14 # Set EPC to next instruction
+
 	# Pop temps back
 	lw $t0, 0($sp)
 	lw $t1, 4($sp)
 	lw $t2, 8($sp)
-	addi $sp, $sp, 0xC
+	lw $a0, 12($sp)
+	addi $sp, $sp, 0x10
 
-	mfc0 $k1, $14 # Get EPC
-	addiu $k1, 0x4 # Next instruction
-	jr $k1 # replace PC with the return address
+	eret # Return to new EPC
 
 _general_exception_handler:
 	# Store a few temporaries for us to use
-	addi $sp, $sp, -0xC
+	addi $sp, $sp, -0x10
 	sw $t0, 0($sp)
 	sw $t1, 4($sp)
 	sw $t2, 8($sp)
+	sw $a0, 12($sp)
 
 	# Read the interrupt cause register
 	mfc0 $t0, $13

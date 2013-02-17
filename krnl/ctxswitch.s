@@ -84,7 +84,10 @@ krnl_create_init_thread:
 initthreadfailed:
 	jal krnl_fubar # Panic
 
-# void krnl_create_thread(void* starting_address)
+# void krnl_create_thread(void* starting_address, void* arg0, void* arg1, void* arg2)
+#
+# Arg0 to Arg3 are optional
+#
 krnl_create_thread:
 
 	# Save the assembler temp
@@ -162,8 +165,11 @@ krnl_create_thread:
 	sw $ra, 0($v0)
 	addi $v0, $v0, 0x4
 
-	# Save the starting address
+	# Save the parameters
 	addi $s0, $a0, 0x0
+	addi $s1, $a1, 0x0
+	addi $s2, $a2, 0x0
+	addi $s3, $a3, 0x0
 
 	# Allocate the thread context
 	li $a0, 0x180
@@ -194,6 +200,12 @@ krnl_create_thread:
 	sw $t2, 0($t3) # Store the current head into the next thread entry
 
 	sw $gp, 0($t0) # Store the current thread into the PCR's thread list head
+
+	# Write arguments into the new thread
+	addi $t0, $gp, 0x0C
+	sw $s1, 0($t0)
+	sw $s2, 4($t0)
+	sw $s3, 8($t0)
 
 	# Write the starting address
 	li $t0, 0x6C
