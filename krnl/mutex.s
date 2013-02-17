@@ -15,14 +15,13 @@
 krnl_mutex_acquire:
 
 	# Save s0
-	addi $sp, $sp, -0x4
+	addi $sp, $sp, -0x8
 	sw $s0, 0($sp)
 
-	addi $s0, $a0, 0x0 # Save the mutex pointer
-
 	# Push the return address onto the stack
-	addi $sp, $sp, -0x4
-	sw $ra, 0($sp)
+	sw $ra, 4($sp)
+
+	addi $s0, $a0, 0x0 # Save the mutex pointer
 
 	jal krnl_disable_interrupts # Disable interrupts to prevent races (v0 gets interrupt state)
 
@@ -33,18 +32,17 @@ loadcurrent:
 	# Nope didn't get it, so we have to setup some wait context
 
 	# Store the mutex as the thread's wait object
-	addi $t1, $k1, 0x78
-	sw $s0, 0($t1)
+	sw $s0, 0x78($k1)
 
 	# Get the head of the waiter list
-	lw $t2, 4($s0)
+	lw $t2, 0x04($s0)
 
 	# Check if anyone is waiting already
 	beq $t2, $zero, firstwaiter
 
 acquireloop:
 	# Read this thread's next waiter entry
-	addi $t0, $t2, 0x7C
+	addi $t0, $t2, 0x7C # Save the address for foundend
 	lw $t2, 0($t0)
 
 	# Check if we've reached the end of the linked list
@@ -81,12 +79,11 @@ noncontendedacquire:
 
 finalizeacquire:
 	# Pop the return address off the stack
-	lw $ra, 0($sp)
-	addi $sp, $sp, 0x4
+	lw $ra, 4($sp)
 
 	# Restore s0
 	lw $s0, 0($sp)
-	addi $sp, $sp, 0x4
+	addi $sp, $sp, 0x8
 
 	jr $ra # Return holding the lock
 
@@ -121,14 +118,12 @@ mutexhandoff:
 	# Another thread wants this mutex ($t1 has thread pointer)
 
 	# Clear the wait object in the next thread
-	addi $t2, $t1, 0x78
-	sw $zero, 0($t2)
+	sw $zero, 0x78($t1)
 
 	# Move the next thread in wait queue to the waiter list head
-	addi $t2, $t1, 0x7C
-	lw $t3, 0($t2) # Load it from the next thread
+	lw $t3, 0x7C($t1) # Load it from the next thread
 	sw $t3, 4($a0) # Store it to the mutex
-	sw $zero, 0($t2) # Clear it from the next thread
+	sw $zero, 0x7C($t1) # Clear it from the next thread
 
 	addi $a0, $v0, 0x0 # Load krnl_disable_interrupts return value as parameter 0
 	jal krnl_restore_interrupts # Restore interrupts to allow preemption again
