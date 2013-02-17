@@ -30,8 +30,8 @@ krnl_pcr_alloc:
 	# Write this thread as the current thread and idle thread
 	li $t0, 0x4
 	add $t0, $v0, $t0
-	sw $gp, 0($t0)
-	sw $gp, 8($t0)
+	sw $k1, 0($t0)
+	sw $k1, 8($t0)
 
 	# No running thread head right now
 	li $t1, 0x0

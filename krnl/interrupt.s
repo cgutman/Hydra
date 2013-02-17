@@ -52,7 +52,7 @@ krnl_unregister_interrupt:
 # int krnl_disable_interrupts()
 krnl_disable_interrupts:
 	# Load the PCR
-	addi $t0, $gp, 0x74
+	addi $t0, $k1, 0x74
 	lw $t0, 0($t0)
 
 	# Load the old interrupt state into the return register
@@ -70,7 +70,7 @@ krnl_disable_interrupts:
 # void krnl_restore_interrupts(int oldstate)
 krnl_restore_interrupts:
 	# Load the PCR
-	addi $t0, $gp, 0x74
+	addi $t0, $k1, 0x74
 	lw $t0, 0($t0)
 
 	# Write the old state back

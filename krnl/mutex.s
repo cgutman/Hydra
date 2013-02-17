@@ -33,7 +33,7 @@ loadcurrent:
 	# Nope didn't get it, so we have to setup some wait context
 
 	# Store the mutex as the thread's wait object
-	addi $t1, $gp, 0x78
+	addi $t1, $k1, 0x78
 	sw $s0, 0($t1)
 
 	# Get the head of the waiter list
@@ -55,12 +55,12 @@ acquireloop:
 
 firstwaiter:
 	# We're the head of the list
-	sw $gp, 4($s0)
+	sw $k1, 4($s0)
 	j waitforacquire
 
 foundend:
 	# We're at the end ($t0 contains the address of the empty entry)
-	sw $gp, 0($t0)
+	sw $k1, 0($t0)
 
 waitforacquire:
 	addi $a0, $v0, 0x0 # Load krnl_disable_interrupts return value as parameter 0
@@ -72,7 +72,7 @@ waitforacquire:
 	j finalizeacquire
 
 noncontendedacquire:
-	addi $t0, $gp, 0x0 # Save thread context
+	addi $t0, $k1, 0x0 # Save thread context
 	sc $t0, 0($s0)  # This thread context is the mutex's value
 	beq $t0, $zero, loadcurrent # Try again if the save failed
 
