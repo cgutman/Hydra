@@ -4,10 +4,13 @@
 void init(void)
 {
 	// Configure system for max performance at 80 MHz
-	SYSTEMConfigPerformance(80000000);
+	//SYSTEMConfigPerformance(80000000);
 
 	// Make LED pins output
 	PORTSetPinsDigitalOut(IOPORT_D, BIT_0 | BIT_1 | BIT_2);
+
+	// Make 2nd switch pin input
+	PORTSetPinsDigitalIn(IOPORT_D, BIT_6 | BIT_7 | BIT_5);
 
 	// Clear LED pins
 	PORTClearBits(IOPORT_D, BIT_0 | BIT_1 | BIT_2);
@@ -30,12 +33,14 @@ void clearGreen(void)
 
 void red(void)
 {
-	PORTSetBits(IOPORT_D, BIT_0);
+	if (PORTReadBits(IOPORT_D, BIT_6) != BIT_6)
+		PORTSetBits(IOPORT_D, BIT_0);
 }
 
 void yellow(void)
 {
-	PORTSetBits(IOPORT_D, BIT_1);
+	if (PORTReadBits(IOPORT_D, BIT_7) != BIT_7)
+		PORTSetBits(IOPORT_D, BIT_1);
 }
 
 void green(void)

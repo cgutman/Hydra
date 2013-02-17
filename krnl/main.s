@@ -28,7 +28,6 @@ idle:
 	j idle
 
 test1:
-
 	# Spawn a second thread
 	la $a0, test2
 	jal krnl_create_thread

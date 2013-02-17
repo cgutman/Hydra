@@ -26,7 +26,8 @@ krnl_mutex_acquire:
 
 	jal krnl_disable_interrupts # Disable interrupts to prevent races (v0 gets interrupt state)
 
-	lw $t0, 0($s0) # Load the current value of mutex
+loadcurrent:
+	ll $t0, 0($s0) # Load the current value of mutex
 	beq $t0, $zero, noncontendedacquire # Branch if we get the lock the first time
 
 	# Nope didn't get it, so we have to setup some wait context
@@ -71,7 +72,9 @@ waitforacquire:
 	j finalizeacquire
 
 noncontendedacquire:
-	sw $gp, 0($s0)  # This thread context is the mutex's value
+	addi $t0, $gp, 0x0 # Save thread context
+	sc $t0, 0($s0)  # This thread context is the mutex's value
+	beq $t0, $zero, loadcurrent # Try again if the save failed
 
 	addi $a0, $v0, 0x0 # Load krnl_disable_interrupts return value as parameter 0
 	jal krnl_restore_interrupts # Restore interrupts to allow preemption again
@@ -108,6 +111,9 @@ finalizerelease:
 	# Pop the return address off the stack
 	lw $ra, 0($sp)
 	addi $sp, $sp, 0x4
+
+	# Wait for memory write to propagate
+	sync
 
 	jr $ra # Return after releasing the lock
 
