@@ -21,12 +21,12 @@ krnl_init:
 	jal krnl_mmregion_init
 
 	# Allocate some stack for the initial system thread
-	li $a0, 0x20 # 32 bytes should do
+	li $a0, 0x100 # 256 bytes should do
 	jal krnl_mmregion_alloc
 	beq $v0, $zero, initfailed # Check for allocation failure
 
 	# Setup init thread's stack (destroys existing stack but doesn't matter)
-	addi $sp, $v0, 0x20
+	addi $sp, $v0, 0x100
 
 	# Push the return address onto the new stack so it is saved until after thread creation
 	addi $sp, $sp, -0x4

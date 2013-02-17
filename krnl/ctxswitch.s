@@ -24,8 +24,8 @@
 # 0x74 PCR pointer
 # 0x78 Wait object pointer
 # 0x7C Next thread in wait entry
-# 0x80 Stack
-# 0x100 End
+# 0x80 End of stack
+# 0x180 Beginning of stack
 #
 
 
@@ -166,7 +166,7 @@ krnl_create_thread:
 	addi $s0, $a0, 0x0
 
 	# Allocate the thread context
-	li $a0, 0x104
+	li $a0, 0x180
 	jal krnl_paged_alloc
 
 	# Save the old thread
@@ -201,7 +201,7 @@ krnl_create_thread:
 	sw $s0, 0($t0)
 
 	# Write the stack address
-	li $t0, 0x100
+	li $t0, 0x180
 	add $t1, $t0, $gp
 	li $t0, 0x64
 	add $t0, $t0, $gp

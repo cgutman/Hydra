@@ -7,6 +7,9 @@ main:
 	# Initialize the kernel
 	jal krnl_init
 
+	# Initialize the LEDs
+	jal init
+
 	# Initialize the mutex
 	li $a0, 0x80004000
 	jal krnl_mutex_init
@@ -25,6 +28,7 @@ idle:
 	j idle
 
 test1:
+
 	# Spawn a second thread
 	la $a0, test2
 	jal krnl_create_thread
@@ -33,29 +37,21 @@ test1:
 	la $a0, test3
 	jal krnl_create_thread
 
-	# Spawn a fourth thread
-	la $a0, test4
-	jal krnl_create_thread
-
-	# Spawn a fifth thread
-	la $a0, test5
-	jal krnl_create_thread
-
-	# Spawn a sixth thread
-	la $a0, test6
-	jal krnl_create_thread
-
 	li $a1, 0x0
 
 	t1:
 		li $a0, 0x80004000
 		jal krnl_mutex_acquire
 
+		jal red
+
 		addi $a1, $a1, 0x1
 
 		jal krnl_sleep_thread
 
 		addi $a1, $a1, 0x1
+
+		jal clearRed
 
 		li $a0, 0x80004000
 		jal krnl_mutex_release
@@ -68,11 +64,15 @@ test2:
 		li $a0, 0x80004000
 		jal krnl_mutex_acquire
 
+		jal yellow
+
 		addi $a1, $a1, 0x1
 
 		jal krnl_sleep_thread
 
 		addi $a1, $a1, 0x1
+
+		jal clearYellow
 
 		li $a0, 0x80004000
 		jal krnl_mutex_release
@@ -85,64 +85,17 @@ test3:
 		li $a0, 0x80004000
 		jal krnl_mutex_acquire
 
+		jal green
+
 		addi $a1, $a1, 0x1
 
 		jal krnl_sleep_thread
 
 		addi $a1, $a1, 0x1
+
+		jal clearGreen
 
 		li $a0, 0x80004000
 		jal krnl_mutex_release
 
 		j t3
-
-test4:
-	li $a1, 0x0
-	t4:
-		li $a0, 0x80004000
-		jal krnl_mutex_acquire
-
-		addi $a1, $a1, 0x1
-
-		jal krnl_sleep_thread
-
-		addi $a1, $a1, 0x1
-
-		li $a0, 0x80004000
-		jal krnl_mutex_release
-
-		j t4
-
-test5:
-	li $a1, 0x0
-	t5:
-		li $a0, 0x80004000
-		jal krnl_mutex_acquire
-
-		addi $a1, $a1, 0x1
-
-		jal krnl_sleep_thread
-
-		addi $a1, $a1, 0x1
-
-		li $a0, 0x80004000
-		jal krnl_mutex_release
-
-		j t5
-
-test6:
-	li $a1, 0x0
-	t6:
-		li $a0, 0x80004000
-		jal krnl_mutex_acquire
-
-		addi $a1, $a1, 0x1
-
-		jal krnl_sleep_thread
-
-		addi $a1, $a1, 0x1
-
-		li $a0, 0x80004000
-		jal krnl_mutex_release
-
-		j t6
