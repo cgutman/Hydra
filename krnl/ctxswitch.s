@@ -1,6 +1,7 @@
 .globl krnl_create_thread
 .globl krnl_sleep_thread
 .globl krnl_create_init_thread
+.globl krnl_scheduler_init
 
 .set noat # $at can't be used here because we have to save it
 
@@ -24,10 +25,51 @@
 # 0x74 PCR pointer
 # 0x78 Wait object pointer
 # 0x7C Next thread in wait entry
-# 0x80 End of stack
-# 0x180 Beginning of stack
+# 0x80 Thread PC
+# 0x84 End of stack
+# 0x184 Beginning of stack
 #
 
+# int krnl_scheduler_init()
+krnl_scheduler_init:
+	# Save the return address
+	addi $sp, $sp, -0x4
+	sw $ra, 0($sp)
+
+	# Register for the timer interrupt
+	li $a0, 0x07
+	la $a1, krnl_scheduler_timer
+	jal krnl_register_interrupt
+
+	# Restore the return address
+	lw $ra, 0($sp)
+	addi $sp, $sp, 0x4
+
+	# Success
+	li $v0, 0x0
+	jr $ra
+
+# void krnl_scheduler_timer()
+# Only t0, t1, t2, and a0 are available
+krnl_scheduler_timer:
+	# Return address is the EPC
+	mfc0 $t0, $14
+	sw $t0, 0x80($k1)
+
+	# Calculate a new compare value to trigger the next interrupt
+	mfc0 $t0, $9 # Move from Count
+	addi $t0, $t0, 0x1000 # Compute a new Compare value
+	mtc0 $t0, $11 # Move to Compare
+
+	# Pop saved variables off the stack before freezing
+	lw $t0, 0($sp)
+	lw $t1, 4($sp)
+	lw $t2, 8($sp)
+	lw $a0, 12($sp)
+	addi $sp, $sp, 0x10
+
+	# Trigger the scheduler
+	j krnl_freeze_thread
 
 # void krnl_create_init_thread(void* pcr)
 krnl_create_init_thread:
@@ -38,7 +80,7 @@ krnl_create_init_thread:
 	addi $s1, $a0, 0x0
 
 	# Allocate the thread context (minus stack)
-	li $a0, 0x80
+	li $a0, 0x84
 	jal krnl_mmregion_alloc
 	beq $v0, $zero, initthreadfailed
 
@@ -49,7 +91,7 @@ krnl_create_init_thread:
 	sw $s1, 0x74($k1)
 
 	# Write the starting address
-	sw $s0, 0x6C($k1)
+	sw $s0, 0x80($k1)
 
 	# Write the stack address (already setup)
 	sw $sp, 0x64($k1)
@@ -121,6 +163,9 @@ krnl_create_thread:
 	# Save the return address
 	sw $ra, 0x6C($k1)
 
+	# The PC is the return address
+	sw $ra, 0x80($k1)
+
 	# Save the parameters
 	addi $s0, $a0, 0x0
 	addi $s1, $a1, 0x0
@@ -128,7 +173,7 @@ krnl_create_thread:
 	addi $s3, $a3, 0x0
 
 	# Allocate the thread context
-	li $a0, 0x180
+	li $a0, 0x184
 	jal krnl_paged_alloc
 
 	# Save the old thread
@@ -154,10 +199,10 @@ krnl_create_thread:
 	sw $s3, 0x14($k1)
 
 	# Write the starting address
-	sw $s0, 0x6C($k1)
+	sw $s0, 0x80($k1)
 
 	# Write the stack address
-	addi $t1, $k1, 0x180
+	addi $t1, $k1, 0x184
 	sw $t1, 0x64($k1)
 
 	# Write the wait object pointer
@@ -214,7 +259,7 @@ idle:
 	# Unfreeze the idle thread
 	j krnl_unfreeze_thread
 
-krnl_sleep_thread:
+krnl_freeze_thread:
 	# Save the assembler temp
 	sw $at, 0x00($k1)
 
@@ -265,7 +310,18 @@ krnl_sleep_thread:
 
 	jal krnl_schedule_new_thread
 
+krnl_sleep_thread:
+	# Return address is the PC
+	sw $ra, 0x80($k1)
+
+	# Freeze the thread
+	j krnl_freeze_thread
+
 krnl_unfreeze_thread:
+	# Write the old PC to EPC for eret
+	lw $t0, 0x80($k1)
+	mtc0 $t0, $14
+
 	# Restore at
 	lw $at, 0x00($k1)
 
@@ -312,5 +368,5 @@ krnl_unfreeze_thread:
 	# Restore the return address
 	lw $ra, 0x6C($k1)
 
-	# HACK: Restart execution
-	jr $ra
+	# Return to the old PC
+	eret

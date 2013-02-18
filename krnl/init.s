@@ -52,8 +52,13 @@ krnl_init:
 	addi $a0, $v0, 0x0 # PCR is argument 0
 	jal krnl_create_init_thread
 
-	# Init thread exists, interrupts are ok
-	ei
+	# Setup exception handling
+	jal krnl_exception_init
+	bne $v0, $zero, initfailed
+
+	# Setup the CPU scheduler
+	jal krnl_scheduler_init
+	bne $v0, $zero, initfailed
 
 	# Initialize the memory manager
 	jal krnl_mm_init

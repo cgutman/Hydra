@@ -1,6 +1,7 @@
 .globl _general_exception_handler
 .globl krnl_return_to_epc
 .globl krnl_return_to_epc_next
+.globl krnl_exception_init
 
 .data
 
@@ -29,6 +30,22 @@ krnl_return_to_epc_next:
 	addi $sp, $sp, 0x10
 
 	eret # Return to new EPC
+
+krnl_exception_init:
+	# Setup cause register
+	li $t0, 0x00000000
+	mtc0 $t0, $13
+
+	# Setup status register
+	li $t0, 0x00000000
+	mtc0 $t0, $12
+
+	# Interrupts are ok
+	ei
+
+	# Return
+	li $v0, 0x0
+	jr $ra
 
 _general_exception_handler:
 	# Store a few temporaries for us to use
@@ -90,29 +107,27 @@ _general_exception_handler:
 interrupt:
 	# Start determining the cause
 	srl $t1, $t0, 8
+	andi $t1, $t1, 0xFF
 
-	# Try the software interrupts first
-	li $t2, 1
-	beq $t1, $t2, krnl_softint_0
-	li $t2, 2
-	beq $t1, $t2, krnl_softint_1
+	# Find the source
+	li $a0, 0x0 # Interrupt number
+	li $t0, 0x1 # Interrupt bit
+	li $t2, 0x8 # Max interrupt
+iloop:
+	beq $a0, $t2, ispurious # Break if none were set
 
-	# Now hardware interrupts
-	li $t2, 4
-	beq $t1, $t2, krnl_hardint_2
-	li $t2, 8
-	beq $t1, $t2, krnl_hardint_3
-	li $t2, 16
-	beq $t1, $t2, krnl_hardint_4
-	li $t2, 32
-	beq $t1, $t2, krnl_hardint_5
-	li $t2, 64
-	beq $t1, $t2, krnl_hardint_6
-	li $t2, 128
-	beq $t1, $t2, krnl_hardint_7
+	beq $t1, $t0, krnl_interrupt_dispatch # Check if this is the one
 
-	# If we're still here, something odd happened
-	jal krnl_fubar
+	# Nope, get ready to loop again
+	addi $a0, $a0, 0x1
+	sll $t0, $t0, 0x1
+
+	# Try the next one
+	j iloop
+
+ispurious:
+	# Just return to EPC
+	j krnl_return_to_epc
 
 breakpoint:
 	# We can just return to the next instruction
