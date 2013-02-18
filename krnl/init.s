@@ -7,7 +7,8 @@
 #
 # Kernel memory layout:
 # 0x80000000 - 0x800000FF  Kernel context (reserved)
-# 0x80000100 - 0x80000FFF  Region allocator zone
+# 0x80000100 - 0x800002FF  Kernel stack
+# 0x80000300 - 0x80000FFF  Region allocator zone
 # 0x80001000 - 0x80007FFF  Simple Mm's allocator zone
 #
 # Kernel context (stored in $k0):
@@ -26,19 +27,14 @@ krnl_init:
 	addi $s0, $ra, 0x0
 
 	# Setup the kernel context
-	li $k0, 0x80000000
+	lw $k0, KRNL_CONTEXT_ADDR
 
 	# Initialize the early boot memory manager
 	jal krnl_mmregion_init
 	bne $v0, $zero, initfailed # Check for init failure
 
-	# Allocate some stack for the initial system thread
-	li $a0, 0x100 # 256 bytes should do
-	jal krnl_mmregion_alloc
-	beq $v0, $zero, initfailed # Check for allocation failure
-
 	# Setup init thread's stack (destroys existing stack but doesn't matter)
-	addi $sp, $v0, 0x100
+	lw $sp, KRNL_STACK_ADDR
 
 	# Push the return address onto the new stack so it is saved until after thread creation
 	addi $sp, $sp, -0x4

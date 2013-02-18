@@ -1,9 +1,16 @@
-.globl _general_exception_handler
 .globl krnl_return_to_epc
 .globl krnl_return_to_epc_next
 .globl krnl_exception_init
 
 .data
+
+.section .app_excpt,"ax",@progbits
+.align 12
+.skip 0x180
+krnl_exception:
+	la $k0, krnl_exception_handler
+	jr $k0
+.align 0
 
 .text
 krnl_return_to_epc:
@@ -40,14 +47,21 @@ krnl_exception_init:
 	li $t0, 0x00000000
 	mtc0 $t0, $12
 
-	# Interrupts are ok
+	# Setup ebase
+	li $t0, 0x9D001000
+	mtc0 $t0, $15, 1
+
+	# Interrupts are ok now
 	ei
 
 	# Return
 	li $v0, 0x0
 	jr $ra
 
-_general_exception_handler:
+krnl_exception_handler:
+	# Restore k0 after it was clobbered by the jump
+	lw $k0, KRNL_CONTEXT_ADDR
+
 	# Store a few temporaries for us to use
 	addi $sp, $sp, -0x10
 	sw $t0, 0($sp)

@@ -41,6 +41,12 @@ krnl_scheduler_init:
 	la $a1, krnl_scheduler_timer
 	jal krnl_register_interrupt
 
+	# Setup compare to trigger a timer interrupt
+	mfc0 $t0, $9 # Move from Count
+	li $t1, 0x100000
+	add $t0, $t0, $t1 # Compute a new Compare value
+	mtc0 $t0, $11 # Move to Compare
+
 	# Restore the return address
 	lw $ra, 0($sp)
 	addi $sp, $sp, 0x4
@@ -58,7 +64,8 @@ krnl_scheduler_timer:
 
 	# Calculate a new compare value to trigger the next interrupt
 	mfc0 $t0, $9 # Move from Count
-	addi $t0, $t0, 0x1000 # Compute a new Compare value
+	li $t1, 0x100000
+	add $t0, $t0, $t1 # Compute a new Compare value
 	mtc0 $t0, $11 # Move to Compare
 
 	# Pop saved variables off the stack before freezing
@@ -240,6 +247,9 @@ cyclethreads:
 
 	# Store that we've cycled before
 	addi $t5, $zero, 0x1
+
+	# If there are no other threads, idle
+	beq $t0, $zero, idle
 
 testforblocked:
 	# Check if the thread is blocked
