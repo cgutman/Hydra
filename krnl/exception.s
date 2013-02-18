@@ -149,7 +149,7 @@ breakpoint:
 
 syscallreq:
 	# Not supported yet
-	jal krnl_fubar
+	j krnl_return_to_epc_next
 
 badload:
 badstore:
