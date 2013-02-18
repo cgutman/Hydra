@@ -23,8 +23,9 @@ krnl_pcr_alloc:
 	jal krnl_mmregion_alloc
 	beq $v0, $zero, cleanup # Check for alloc failure
 
-	# Write the CPU number
-	li $t0, 0x0 # FIXME: Hardcoded to CPU 0
+	# Get the CPU number from the EBASE register
+	mfc0 $t0, $15, 1
+	andi $t0, $t0, 0x1FF
 	sw $t0, 0($v0)
 
 	# Write this thread as the current thread and idle thread
