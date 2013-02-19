@@ -19,6 +19,7 @@
 # 0x28 - Memory manager mutex (8 bytes)
 # 0x30 - Memory manager next pointer
 # 0x34 - Memory manager upper bound
+# 0x38 - Mutex contention lock
 # 
 
 # void krnl_init()
@@ -28,6 +29,10 @@ krnl_init:
 
 	# Setup the kernel context
 	lw $k0, KRNL_CONTEXT_ADDR
+
+	# Initialize the mutex contention lock
+	addi $a0, $k0, 0x38
+	jal krnl_spinlock_init
 
 	# Initialize the early boot memory manager
 	jal krnl_mmregion_init

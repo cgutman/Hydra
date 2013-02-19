@@ -23,7 +23,9 @@ krnl_mutex_acquire:
 
 	addi $s0, $a0, 0x0 # Save the mutex pointer
 
-	jal krnl_disable_interrupts # Disable interrupts to prevent races (v0 gets interrupt state)
+	# Acquire the mutex contention lock for MP synchronization
+	addi $a0, $k0, 0x38
+	jal krnl_spinlock_acquire
 
 loadcurrent:
 	ll $t0, 0($s0) # Load the current value of mutex
@@ -61,8 +63,9 @@ foundend:
 	sw $k1, 0($t0)
 
 waitforacquire:
-	addi $a0, $v0, 0x0 # Load krnl_disable_interrupts return value as parameter 0
-	jal krnl_restore_interrupts # Restore interrupts before waiting
+	# Release the mutex contention lock
+	addi $a0, $k0, 0x38
+	jal krnl_spinlock_release
 
 	jal krnl_sleep_thread # Sleep the thread until the mutex is released
 
@@ -74,8 +77,9 @@ noncontendedacquire:
 	sc $t0, 0($s0)  # This thread context is the mutex's value
 	beq $t0, $zero, loadcurrent # Try again if the save failed
 
-	addi $a0, $v0, 0x0 # Load krnl_disable_interrupts return value as parameter 0
-	jal krnl_restore_interrupts # Restore interrupts to allow preemption again
+	# Release the mutex contention lock
+	addi $a0, $k0, 0x38
+	jal krnl_spinlock_release
 
 finalizeacquire:
 	# Pop the return address off the stack
@@ -89,25 +93,33 @@ finalizeacquire:
 
 # void krnl_mutex_release(int* mutex)
 krnl_mutex_release:
-	# Push the return address onto the stack
-	addi $sp, $sp, -0x4
+	# Push the return address and s0 onto the stack
+	addi $sp, $sp, -0x8
 	sw $ra, 0($sp)
+	sw $s0, 4($sp)
 
-	jal krnl_disable_interrupts # Disable interrupts to prevent races (v0 gets interrupt state)
+	# Save the mutex pointer
+	addi $s0, $a0, 0x0
+
+	# Acquire the mutex contention lock
+	addi $a0, $k0, 0x38
+	jal krnl_spinlock_acquire
 
 	# Check if another thread wants this mutex
-	lw $t1, 4($a0)
+	lw $t1, 4($s0)
 	bne $t1, $zero, mutexhandoff
 
-	sw $zero, 0($a0) # Nobody waiting, so release the mutex by writing 0 to it
+	sw $zero, 0($s0) # Nobody waiting, so release the mutex by writing 0 to it
 
-	addi $a0, $v0, 0x0 # Load krnl_disable_interrupts return value as parameter 0
-	jal krnl_restore_interrupts # Restore interrupts to allow preemption again
+	# Release the mutex contention lock
+	addi $a0, $k0, 0x38
+	jal krnl_spinlock_release
 
 finalizerelease:
-	# Pop the return address off the stack
+	# Pop the saved state off the stack
 	lw $ra, 0($sp)
-	addi $sp, $sp, 0x4
+	lw $s0, 4($sp)
+	addi $sp, $sp, 0x8
 
 	# Wait for memory write to propagate
 	sync
@@ -122,11 +134,12 @@ mutexhandoff:
 
 	# Move the next thread in wait queue to the waiter list head
 	lw $t3, 0x7C($t1) # Load it from the next thread
-	sw $t3, 4($a0) # Store it to the mutex
+	sw $t3, 4($s0) # Store it to the mutex
 	sw $zero, 0x7C($t1) # Clear it from the next thread
 
-	addi $a0, $v0, 0x0 # Load krnl_disable_interrupts return value as parameter 0
-	jal krnl_restore_interrupts # Restore interrupts to allow preemption again
+	# Release the mutex contention lock
+	addi $a0, $k0, 0x38
+	jal krnl_spinlock_release
 
 	# Give the newly eligible thread a chance to run
 	jal krnl_sleep_thread

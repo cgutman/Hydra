@@ -46,7 +46,7 @@ krnl_scheduler_init:
 
 	# Start the timer
 	li $a0, 0x1000
-	jal hal_enable_timer
+	#jal hal_enable_timer
 
 	# Restore the return address
 	lw $ra, 0($sp)
