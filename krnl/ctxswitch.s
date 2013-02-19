@@ -26,8 +26,10 @@
 # 0x78 Wait object pointer
 # 0x7C Next thread in wait entry
 # 0x80 Thread PC
-# 0x84 End of stack
-# 0x184 Beginning of stack
+# 0x84 HI register
+# 0x88 LO register
+# 0x8C End of stack
+# 0x18C Beginning of stack
 #
 
 # int krnl_scheduler_init()
@@ -85,7 +87,7 @@ krnl_create_init_thread:
 	addi $s1, $a0, 0x0
 
 	# Allocate the thread context (minus stack)
-	li $a0, 0x84
+	li $a0, 0x8C
 	jal krnl_mmregion_alloc
 	beq $v0, $zero, initthreadfailed
 
@@ -168,6 +170,12 @@ krnl_create_thread:
 	# Save the return address
 	sw $ra, 0x6C($k1)
 
+	# Save HI and LO
+	mfhi $t0
+	mflo $t1
+	sw $t0, 0x84($k1)
+	sw $t1, 0x88($k1)
+
 	# The PC is the return address
 	sw $ra, 0x80($k1)
 
@@ -178,7 +186,7 @@ krnl_create_thread:
 	addi $s3, $a3, 0x0
 
 	# Allocate the thread context
-	li $a0, 0x184
+	li $a0, 0x18C
 	jal krnl_paged_alloc
 
 	# Save the old thread
@@ -207,7 +215,7 @@ krnl_create_thread:
 	sw $s0, 0x80($k1)
 
 	# Write the stack address
-	addi $t1, $k1, 0x184
+	addi $t1, $k1, 0x18C
 	sw $t1, 0x64($k1)
 
 	# Write the wait object pointer
@@ -314,6 +322,12 @@ krnl_freeze_thread:
 	# Save the return address
 	sw $ra, 0x6C($k1)
 
+	# Save HI and LO
+	mfhi $t0
+	mflo $t1
+	sw $t0, 0x84($k1)
+	sw $t1, 0x88($k1)
+
 	# ----------- We are no longer in the context of that thread ----------
 
 	jal krnl_schedule_new_thread
@@ -329,6 +343,12 @@ krnl_unfreeze_thread:
 	# Write the old PC to EPC for eret
 	lw $t0, 0x80($k1)
 	mtc0 $t0, $14
+
+	# Restore HI and LO
+	lw $t0, 0x84($k1)
+	lw $t1, 0x88($k1)
+	mthi $t0
+	mtlo $t1
 
 	# Restore at
 	lw $at, 0x00($k1)
