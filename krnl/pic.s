@@ -35,13 +35,43 @@ hal_enable_timer:
 
 # void hal_clear_timer_interrupt()
 hal_clear_timer_interrupt:
+	# Disable the timer
+	li $t0, 0xBF800804 # T2CONCLR
+	li $t1, 0x8000
+	sw $t1, 0($t0)
+
+	# Clear the current timer value
+	li $t0, 0xBF800814 # TMR2
+	li $t1, 0xFFFFFFFF # Timer mask
+	sw $t1, 0($t0)
+
+	# Clear the interrupt status bit
 	li $t0, 0xBF881034 # IFS0CLR
-	li $t1, 0x100 # Interrupt to clear
+	li $t1, 0x100
+	sw $t1, 0($t0)
+
+	# Reenable the timer
+	li $t0, 0xBF800800 # T2CON
+	li $t1, 0x8000
 	sw $t1, 0($t0)
 
 	jr $ra
 
 # void hal_disable_timer()
 hal_disable_timer:
-	# TODO
+	# Disable timer interrupts
+	li $t0, 0xBF881064 # IEC0CLR
+	li $t1, 0x100
+	sw $t1, 0($t0)
+
+	# Disable the timer
+	li $t0, 0xBF800804 # T2CONCLR
+	li $t1, 0x8000
+	sw $t1, 0($t0)
+
+	# Clear the interrupt status bit
+	li $t0, 0xBF881034 # IFS0CLR
+	li $t1, 0x100
+	sw $t1, 0($t0)
+
 	jr $ra

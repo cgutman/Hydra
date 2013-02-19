@@ -41,14 +41,14 @@ krnl_scheduler_init:
 	# Query the timer interrupt for this platform
 	jal hal_get_timer_irq
 
-	# Register for the timer interrupt
+	# Register the timer interrupt
 	addi $a0, $v0, 0x0
 	la $a1, krnl_scheduler_timer
 	jal krnl_register_interrupt
 
 	# Start the timer
-	li $a0, 0x1000
-	#jal hal_enable_timer
+	li $a0, 0xFF00
+	jal hal_enable_timer
 
 	# Restore the return address
 	lw $ra, 0($sp)
@@ -61,6 +61,10 @@ krnl_scheduler_init:
 # void krnl_scheduler_timer()
 # Only t0, t1, t2, and a0 are available
 krnl_scheduler_timer:
+	# Save the return address to stack
+	addi $sp, $sp, -0x4
+	sw $ra, 0($sp)
+
 	# Return address is the EPC
 	mfc0 $t0, $14
 	sw $t0, 0x80($k1)
@@ -69,11 +73,12 @@ krnl_scheduler_timer:
 	jal hal_clear_timer_interrupt
 
 	# Pop saved variables off the stack before freezing
-	lw $t0, 0($sp)
-	lw $t1, 4($sp)
-	lw $t2, 8($sp)
-	lw $a0, 12($sp)
-	addi $sp, $sp, 0x10
+	lw $ra, 0($sp)
+	lw $t0, 4($sp)
+	lw $t1, 8($sp)
+	lw $t2, 12($sp)
+	lw $a0, 16($sp)
+	addi $sp, $sp, 0x14
 
 	# Trigger the scheduler
 	j krnl_freeze_thread
@@ -113,7 +118,7 @@ krnl_create_init_thread:
 	sw $zero, 0x70($k1)
 
 	# Unfreeze the thread
-	jal krnl_unfreeze_thread
+	j krnl_unfreeze_thread
 
 initthreadfailed:
 	jal krnl_fubar # Panic
@@ -225,7 +230,7 @@ krnl_create_thread:
 	sw $zero, 0x7C($k1)
 
 	# Unfreeze the thread
-	jal krnl_unfreeze_thread
+	j krnl_unfreeze_thread
 
 krnl_schedule_new_thread:
 	# Get the current thread
@@ -330,7 +335,7 @@ krnl_freeze_thread:
 
 	# ----------- We are no longer in the context of that thread ----------
 
-	jal krnl_schedule_new_thread
+	j krnl_schedule_new_thread
 
 krnl_sleep_thread:
 	# Return address is the PC
@@ -340,7 +345,11 @@ krnl_sleep_thread:
 	j krnl_freeze_thread
 
 krnl_unfreeze_thread:
-	# Write the old PC to EPC for eret
+	# Check if we're in an interrupt context
+	lw $t0, KRNL_CONTEXT_ADDR
+	bne $t0, $k0, krnl_interrupt_unfreeze
+
+	# Store the new PC
 	lw $t0, 0x80($k1)
 	mtc0 $t0, $14
 
@@ -398,3 +407,59 @@ krnl_unfreeze_thread:
 
 	# Return to the old PC
 	eret
+
+krnl_interrupt_unfreeze:
+	# Restore HI and LO
+	lw $t0, 0x84($k1)
+	lw $t1, 0x88($k1)
+	mthi $t0
+	mtlo $t1
+
+	# Restore at
+	lw $at, 0x00($k1)
+
+	# Restore v0 - v1
+	lw $v0, 0x04($k1)
+	lw $v1, 0x08($k1)
+
+	# Restore a0 - a3
+	lw $a0, 0x0C($k1)
+	lw $a1, 0x10($k1)
+	lw $a2, 0x14($k1)
+	lw $a3, 0x18($k1)
+
+	# Restore t0 - t7
+	lw $t0, 0x1C($k1)
+	lw $t1, 0x20($k1)
+	lw $t2, 0x24($k1)
+	lw $t3, 0x28($k1)
+	lw $t4, 0x2C($k1)
+	lw $t5, 0x30($k1)
+	lw $t6, 0x34($k1)
+	lw $t7, 0x38($k1)
+
+	# Restore s0 - s7
+	lw $s0, 0x3C($k1)
+	lw $s1, 0x40($k1)
+	lw $s2, 0x44($k1)
+	lw $s3, 0x48($k1)
+	lw $s4, 0x4C($k1)
+	lw $s5, 0x50($k1)
+	lw $s6, 0x54($k1)
+	lw $s7, 0x58($k1)
+
+	# Restore t8 - t9
+	lw $t8, 0x5C($k1)
+	lw $t9, 0x60($k1)
+
+	# Restore stack pointer
+	lw $sp, 0x64($k1)
+
+	# Restore the frame pointer
+	lw $fp, 0x68($k1)
+
+	# Restore the return address
+	lw $ra, 0x6C($k1)
+
+	# Return
+	j krnl_exception_return

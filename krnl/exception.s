@@ -1,6 +1,7 @@
 .globl krnl_return_to_epc
 .globl krnl_return_to_epc_next
 .globl krnl_exception_init
+.globl krnl_exception_return
 
 .data
 
@@ -18,6 +19,15 @@ krnl_interrupt:
 .align 0
 
 .text
+krnl_exception_return:
+	# Restore exception state
+	mtc0 $k0, $13
+
+	# Restore k0
+	lw $k0, KRNL_CONTEXT_ADDR
+
+	eret
+
 krnl_return_to_epc:
 	# Pop temps back
 	lw $t0, 0($sp)
@@ -26,7 +36,7 @@ krnl_return_to_epc:
 	lw $a0, 12($sp)
 	addi $sp, $sp, 0x10
 
-	eret # Return to EPC
+	j krnl_exception_return
 
 krnl_return_to_epc_next:
 
@@ -41,7 +51,7 @@ krnl_return_to_epc_next:
 	lw $a0, 12($sp)
 	addi $sp, $sp, 0x10
 
-	eret # Return to new EPC
+	j krnl_exception_return
 
 krnl_exception_init:
 	# Setup cause register
@@ -49,7 +59,7 @@ krnl_exception_init:
 	mtc0 $t0, $13
 
 	# Setup status register
-	li $t0, 0x0000FF00
+	li $t0, 0x00000000
 	mtc0 $t0, $12
 
 	# Setup ebase
@@ -68,11 +78,9 @@ krnl_exception_init:
 	jr $ra
 
 krnl_interrupt_handler:
-	# Restore k0 after it was clobbered by the jump
-	lw $k0, KRNL_CONTEXT_ADDR
-
-	# Read the cause register
-	mfc0 $t0, $13
+	# Save interrupt handling context
+	mfc0 $k0, $13 # STATUS
+	di
 
 	# Store a few temporaries for us to use
 	addi $sp, $sp, -0x10
@@ -80,6 +88,14 @@ krnl_interrupt_handler:
 	sw $t1, 4($sp)
 	sw $t2, 8($sp)
 	sw $a0, 12($sp)
+
+	# Read the cause register
+	mfc0 $t0, $13
+
+	# Mask the cause register
+	li $t1, 0xFFFF00FF
+	and $t1, $t0, $t1
+	mtc0 $t1, $13
 
 	# Start determining the cause
 	srl $t1, $t0, 8

@@ -94,7 +94,7 @@ ret:
 # krnl_interrupt_dispatch(int interrupt)
 # NOTE: Only t0, t1, t2, and a0 are writable
 krnl_interrupt_dispatch:
-	addi $t0, $k0, 0x0 # Load the interrupt vector table pointer
+	lw $t0, KRNL_CONTEXT_ADDR # Load the interrupt vector table pointer
 	sll $t1, $a0, 2 # Get the offset to the vector pointer
 	add $t0, $t0, $t1 # Add them to get the address of the vector pointer
 	lw $t0, 0($t0) # Load the vector
