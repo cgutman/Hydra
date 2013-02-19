@@ -36,16 +36,17 @@ krnl_scheduler_init:
 	addi $sp, $sp, -0x4
 	sw $ra, 0($sp)
 
+	# Query the timer interrupt for this platform
+	jal hal_get_timer_irq
+
 	# Register for the timer interrupt
-	li $a0, 0x07
+	addi $a0, $v0, 0x0
 	la $a1, krnl_scheduler_timer
 	jal krnl_register_interrupt
 
-	# Setup compare to trigger a timer interrupt
-	mfc0 $t0, $9 # Move from Count
-	li $t1, 0x100000
-	add $t0, $t0, $t1 # Compute a new Compare value
-	mtc0 $t0, $11 # Move to Compare
+	# Start the timer
+	li $a0, 0x1000
+	jal hal_enable_timer
 
 	# Restore the return address
 	lw $ra, 0($sp)
@@ -62,11 +63,8 @@ krnl_scheduler_timer:
 	mfc0 $t0, $14
 	sw $t0, 0x80($k1)
 
-	# Calculate a new compare value to trigger the next interrupt
-	mfc0 $t0, $9 # Move from Count
-	li $t1, 0x100000
-	add $t0, $t0, $t1 # Compute a new Compare value
-	mtc0 $t0, $11 # Move to Compare
+	# Reset the interrupt
+	jal hal_clear_timer_interrupt
 
 	# Pop saved variables off the stack before freezing
 	lw $t0, 0($sp)

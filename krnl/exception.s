@@ -10,6 +10,11 @@
 krnl_exception:
 	la $k0, krnl_exception_handler
 	jr $k0
+
+.skip 0x70
+krnl_interrupt:
+	la $k0, krnl_interrupt_handler
+	jr $k0
 .align 0
 
 .text
@@ -40,16 +45,20 @@ krnl_return_to_epc_next:
 
 krnl_exception_init:
 	# Setup cause register
-	li $t0, 0x00000000
+	li $t0, 0x00800000
 	mtc0 $t0, $13
 
 	# Setup status register
-	li $t0, 0x00000000
+	li $t0, 0x0000FF00
 	mtc0 $t0, $12
 
 	# Setup ebase
 	li $t0, 0x9D001000
 	mtc0 $t0, $15, 1
+
+	# Setup IntCtl
+	li $t0, 0x00000000
+	mtc0 $t0, $12, 1
 
 	# Interrupts are ok now
 	ei
@@ -57,6 +66,44 @@ krnl_exception_init:
 	# Return
 	li $v0, 0x0
 	jr $ra
+
+krnl_interrupt_handler:
+	# Restore k0 after it was clobbered by the jump
+	lw $k0, KRNL_CONTEXT_ADDR
+
+	# Read the cause register
+	mfc0 $t0, $13
+
+	# Store a few temporaries for us to use
+	addi $sp, $sp, -0x10
+	sw $t0, 0($sp)
+	sw $t1, 4($sp)
+	sw $t2, 8($sp)
+	sw $a0, 12($sp)
+
+	# Start determining the cause
+	srl $t1, $t0, 8
+	andi $t1, $t1, 0xFF
+
+	# Find the source
+	li $a0, 0x0 # Interrupt number
+	li $t0, 0x1 # Interrupt bit
+	li $t2, 0x8 # Max interrupt
+iloop:
+	beq $a0, $t2, ispurious # Break if none were set
+
+	beq $t1, $t0, krnl_interrupt_dispatch # Check if this is the one
+
+	# Nope, get ready to loop again
+	addi $a0, $a0, 0x1
+	sll $t0, $t0, 0x1
+
+	# Try the next one
+	j iloop
+
+ispurious:
+	# Just return to EPC
+	j krnl_return_to_epc
 
 krnl_exception_handler:
 	# Restore k0 after it was clobbered by the jump
@@ -69,15 +116,12 @@ krnl_exception_handler:
 	sw $t2, 8($sp)
 	sw $a0, 12($sp)
 
-	# Read the interrupt cause register
+	# Read the cause register
 	mfc0 $t0, $13
 
 	# Mask everything but the exception cause
 	srl $t1, $t0, 2
 	andi $t1, $t1, 0xF
-
-	# Check if it's an interrupt
-	beq $t1, $zero, interrupt
 
 	# Check for a syscall request
 	li $t2, 8
@@ -117,31 +161,6 @@ krnl_exception_handler:
 
 	# Unknown exception type
 	jal krnl_fubar
-
-interrupt:
-	# Start determining the cause
-	srl $t1, $t0, 8
-	andi $t1, $t1, 0xFF
-
-	# Find the source
-	li $a0, 0x0 # Interrupt number
-	li $t0, 0x1 # Interrupt bit
-	li $t2, 0x8 # Max interrupt
-iloop:
-	beq $a0, $t2, ispurious # Break if none were set
-
-	beq $t1, $t0, krnl_interrupt_dispatch # Check if this is the one
-
-	# Nope, get ready to loop again
-	addi $a0, $a0, 0x1
-	sll $t0, $t0, 0x1
-
-	# Try the next one
-	j iloop
-
-ispurious:
-	# Just return to EPC
-	j krnl_return_to_epc
 
 breakpoint:
 	# We can just return to the next instruction

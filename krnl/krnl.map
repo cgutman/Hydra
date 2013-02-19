@@ -30,26 +30,26 @@ Microchip PIC32 Memory-Usage Report
 kseg0 Program-Memory Usage
 section                    address  length [bytes]      (dec)  Description
 -------                 ----------  -------------------------  -----------
-.text                   0x9d000008          0x86c        2156  App's exec code 
-.text.general_exception 0x9d000874           0xd0         208   
-.text                   0x9d000944          0x1ec         492  App's exec code 
-.rodata                 0x9d000b30           0x54          84  Read-only const 
-.text                   0x9d000b84           0x8c         140  App's exec code 
-.text.PORTSetPinsDigita 0x9d000c10           0x40          64   
-.text.PORTSetPinsDigita 0x9d000c50           0x40          64   
-.text                   0x9d000c90           0x38          56  App's exec code 
-.text.PORTReadBits      0x9d000cc8           0x28          40   
-.text.PORTClearBits     0x9d000cf0           0x28          40   
-.text.PORTSetBits       0x9d000d18           0x28          40   
-.text                   0x9d000d40           0x48          72  App's exec code 
-.text._general_exceptio 0x9d000d88            0xc          12   
-.text._bootstrap_except 0x9d000d94            0xc          12   
-.text                   0x9d000da0           0x10          16  App's exec code 
-.text._on_reset         0x9d000db0            0x8           8   
-.text._on_bootstrap     0x9d000db8            0x8           8   
-.dinit                  0x9d000dc0            0x4           4   
+.text                   0x9d000008          0x880        2176  App's exec code 
+.text.general_exception 0x9d000888           0xd0         208   
+.text                   0x9d000958          0x27c         636  App's exec code 
+.rodata                 0x9d000bd4           0x54          84  Read-only const 
+.text                   0x9d000c28           0x8c         140  App's exec code 
+.text.PORTSetPinsDigita 0x9d000cb4           0x40          64   
+.text.PORTSetPinsDigita 0x9d000cf4           0x40          64   
+.text                   0x9d000d34           0x38          56  App's exec code 
+.text.PORTReadBits      0x9d000d6c           0x28          40   
+.text.PORTClearBits     0x9d000d94           0x28          40   
+.text.PORTSetBits       0x9d000dbc           0x28          40   
+.text                   0x9d000de4           0x48          72  App's exec code 
+.text._general_exceptio 0x9d000e2c            0xc          12   
+.text._bootstrap_except 0x9d000e38            0xc          12   
+.text                   0x9d000e44           0x10          16  App's exec code 
+.text._on_reset         0x9d000e54            0x8           8   
+.text._on_bootstrap     0x9d000e5c            0x8           8   
+.dinit                  0x9d000e64            0x4           4   
 .app_excpt              0x9d001000         0x1000        4096  General-Exception 
-      Total kseg0_program_mem used  :      0x1dbc        7612  1.5% of 0x80000
+      Total kseg0_program_mem used  :      0x1e60        7776  1.5% of 0x80000
 
 kseg0 Boot-Memory Usage
 section                    address  length [bytes]      (dec)  Description
@@ -69,7 +69,7 @@ section                    address  length [bytes]      (dec)  Description
 .bev_excpt              0xbfc00380           0x10          16  BEV-Exception 
          Total kseg1_boot_mem used  :       0x204         516  44.2% of 0x490
         --------------------------------------------------------------------------
-         Total Program Memory used  :      0x1fd0        8144  1.5% of 0x81e00
+         Total Program Memory used  :      0x2074        8308  1.6% of 0x81e00
         --------------------------------------------------------------------------
 
 
@@ -122,6 +122,8 @@ Discarded input sections
  .pdr           0x00000000        0x0 exception.o
  .reginfo       0x00000000       0x18 addrmap.o
  .pdr           0x00000000        0x0 addrmap.o
+ .reginfo       0x00000000       0x18 pic.o
+ .pdr           0x00000000        0x0 pic.o
  .reginfo       0x00000000       0x18 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(general-exception.o)
  .pdr           0x00000000       0x20 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(general-exception.o)
  .reginfo       0x00000000       0x18 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-general-exception-handler.o)
@@ -183,6 +185,7 @@ LOAD pcr.o
 LOAD led.o
 LOAD exception.o
 LOAD addrmap.o
+LOAD pic.o
                 0x00000001                __MPLAB_BUILD = 0x1
 LOAD c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1\libgcc.a
 START GROUP
@@ -633,7 +636,7 @@ LOAD c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5
 .debug_sfnames
  *(.debug_sfnames)
 
-.debug_aranges  0x00000000      0x2c8
+.debug_aranges  0x00000000      0x2e8
  *(.debug_aranges)
  .debug_aranges
                 0x00000000       0x20 spinlock.o
@@ -662,23 +665,25 @@ LOAD c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5
  .debug_aranges
                 0x00000180       0x28 exception.o
  .debug_aranges
-                0x000001a8       0x20 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-general-exception-handler.o)
+                0x000001a8       0x20 pic.o
  .debug_aranges
-                0x000001c8       0x20 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-bootstrap-exception-handler.o)
+                0x000001c8       0x20 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-general-exception-handler.o)
  .debug_aranges
-                0x000001e8       0x20 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-reset.o)
+                0x000001e8       0x20 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-bootstrap-exception-handler.o)
  .debug_aranges
-                0x00000208       0x20 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-bootstrap.o)
+                0x00000208       0x20 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-reset.o)
  .debug_aranges
-                0x00000228       0x20 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_in_lib.o)
+                0x00000228       0x20 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-bootstrap.o)
  .debug_aranges
-                0x00000248       0x20 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_out_lib.o)
+                0x00000248       0x20 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_in_lib.o)
  .debug_aranges
-                0x00000268       0x20 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_read_bits_lib.o)
+                0x00000268       0x20 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_out_lib.o)
  .debug_aranges
-                0x00000288       0x20 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_clear_bits_lib.o)
+                0x00000288       0x20 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_read_bits_lib.o)
  .debug_aranges
-                0x000002a8       0x20 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_bits_lib.o)
+                0x000002a8       0x20 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_clear_bits_lib.o)
+ .debug_aranges
+                0x000002c8       0x20 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_bits_lib.o)
 
 .debug_pubnames
                 0x00000000      0x1cc
@@ -704,7 +709,7 @@ LOAD c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5
  .debug_pubnames
                 0x000001aa       0x22 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_bits_lib.o)
 
-.debug_info     0x00000000     0x1c60
+.debug_info     0x00000000     0x1cbc
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x00000000       0x61 spinlock.o
  .debug_info    0x00000061       0x62 interrupt.o
@@ -719,18 +724,19 @@ LOAD c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5
  .debug_info    0x000003bb       0x5c pcr.o
  .debug_info    0x00000417     0x1044 led.o
  .debug_info    0x0000145b       0x5e exception.o
- .debug_info    0x000014b9      0x102 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-general-exception-handler.o)
- .debug_info    0x000015bb      0x106 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-bootstrap-exception-handler.o)
- .debug_info    0x000016c1       0xe0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-reset.o)
- .debug_info    0x000017a1       0xe8 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-bootstrap.o)
- .debug_info    0x00001889       0xcf c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_in_lib.o)
- .debug_info    0x00001958       0xd1 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_out_lib.o)
- .debug_info    0x00001a29       0xbd c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_read_bits_lib.o)
- .debug_info    0x00001ae6       0xbf c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_clear_bits_lib.o)
- .debug_info    0x00001ba5       0xbb c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_bits_lib.o)
- .debug_info    0x00001c60        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(_ports_tbl_libp.o)
+ .debug_info    0x000014b9       0x5c pic.o
+ .debug_info    0x00001515      0x102 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-general-exception-handler.o)
+ .debug_info    0x00001617      0x106 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-bootstrap-exception-handler.o)
+ .debug_info    0x0000171d       0xe0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-reset.o)
+ .debug_info    0x000017fd       0xe8 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-bootstrap.o)
+ .debug_info    0x000018e5       0xcf c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_in_lib.o)
+ .debug_info    0x000019b4       0xd1 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_out_lib.o)
+ .debug_info    0x00001a85       0xbd c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_read_bits_lib.o)
+ .debug_info    0x00001b42       0xbf c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_clear_bits_lib.o)
+ .debug_info    0x00001c01       0xbb c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_bits_lib.o)
+ .debug_info    0x00001cbc        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(_ports_tbl_libp.o)
 
-.debug_abbrev   0x00000000      0x3cb
+.debug_abbrev   0x00000000      0x3df
  *(.debug_abbrev)
  .debug_abbrev  0x00000000       0x14 spinlock.o
  .debug_abbrev  0x00000014       0x14 interrupt.o
@@ -745,42 +751,44 @@ LOAD c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5
  .debug_abbrev  0x000000c8       0x14 pcr.o
  .debug_abbrev  0x000000dc      0x18f led.o
  .debug_abbrev  0x0000026b       0x12 exception.o
- .debug_abbrev  0x0000027d       0x25 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-general-exception-handler.o)
- .debug_abbrev  0x000002a2       0x25 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-bootstrap-exception-handler.o)
- .debug_abbrev  0x000002c7       0x25 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-reset.o)
- .debug_abbrev  0x000002ec       0x25 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-bootstrap.o)
- .debug_abbrev  0x00000311       0x25 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_in_lib.o)
- .debug_abbrev  0x00000336       0x25 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_out_lib.o)
- .debug_abbrev  0x0000035b       0x25 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_read_bits_lib.o)
- .debug_abbrev  0x00000380       0x25 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_clear_bits_lib.o)
- .debug_abbrev  0x000003a5       0x25 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_bits_lib.o)
- .debug_abbrev  0x000003ca        0x1 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(_ports_tbl_libp.o)
+ .debug_abbrev  0x0000027d       0x14 pic.o
+ .debug_abbrev  0x00000291       0x25 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-general-exception-handler.o)
+ .debug_abbrev  0x000002b6       0x25 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-bootstrap-exception-handler.o)
+ .debug_abbrev  0x000002db       0x25 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-reset.o)
+ .debug_abbrev  0x00000300       0x25 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-bootstrap.o)
+ .debug_abbrev  0x00000325       0x25 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_in_lib.o)
+ .debug_abbrev  0x0000034a       0x25 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_out_lib.o)
+ .debug_abbrev  0x0000036f       0x25 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_read_bits_lib.o)
+ .debug_abbrev  0x00000394       0x25 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_clear_bits_lib.o)
+ .debug_abbrev  0x000003b9       0x25 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_bits_lib.o)
+ .debug_abbrev  0x000003de        0x1 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(_ports_tbl_libp.o)
 
-.debug_line     0x00000000      0xb60
+.debug_line     0x00000000      0xbb6
  *(.debug_line)
  .debug_line    0x00000000       0x44 spinlock.o
  .debug_line    0x00000044       0x68 interrupt.o
- .debug_line    0x000000ac       0xe3 ctxswitch.o
- .debug_line    0x0000018f       0x5d simplemm.o
- .debug_line    0x000001ec       0x6b main.o
- .debug_line    0x00000257       0x4a init.o
- .debug_line    0x000002a1       0x71 mutex.o
- .debug_line    0x00000312       0x3a event.o
- .debug_line    0x0000034c       0x37 fubar.o
- .debug_line    0x00000383       0x47 mmregion.o
- .debug_line    0x000003ca       0x44 pcr.o
- .debug_line    0x0000040e      0x219 led.o
- .debug_line    0x00000627       0x8f exception.o
- .debug_line    0x000006b6       0xa4 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-general-exception-handler.o)
- .debug_line    0x0000075a       0xa6 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-bootstrap-exception-handler.o)
- .debug_line    0x00000800       0x93 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-reset.o)
- .debug_line    0x00000893       0x97 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-bootstrap.o)
- .debug_line    0x0000092a       0x77 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_in_lib.o)
- .debug_line    0x000009a1       0x78 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_out_lib.o)
- .debug_line    0x00000a19       0x6d c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_read_bits_lib.o)
- .debug_line    0x00000a86       0x6e c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_clear_bits_lib.o)
- .debug_line    0x00000af4       0x6c c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_bits_lib.o)
- .debug_line    0x00000b60        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(_ports_tbl_libp.o)
+ .debug_line    0x000000ac       0xdf ctxswitch.o
+ .debug_line    0x0000018b       0x5d simplemm.o
+ .debug_line    0x000001e8       0x6b main.o
+ .debug_line    0x00000253       0x4c init.o
+ .debug_line    0x0000029f       0x71 mutex.o
+ .debug_line    0x00000310       0x3a event.o
+ .debug_line    0x0000034a       0x37 fubar.o
+ .debug_line    0x00000381       0x47 mmregion.o
+ .debug_line    0x000003c8       0x44 pcr.o
+ .debug_line    0x0000040c      0x219 led.o
+ .debug_line    0x00000625       0x9b exception.o
+ .debug_line    0x000006c0       0x4c pic.o
+ .debug_line    0x0000070c       0xa4 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-general-exception-handler.o)
+ .debug_line    0x000007b0       0xa6 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-bootstrap-exception-handler.o)
+ .debug_line    0x00000856       0x93 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-reset.o)
+ .debug_line    0x000008e9       0x97 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-bootstrap.o)
+ .debug_line    0x00000980       0x77 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_in_lib.o)
+ .debug_line    0x000009f7       0x78 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_out_lib.o)
+ .debug_line    0x00000a6f       0x6d c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_read_bits_lib.o)
+ .debug_line    0x00000adc       0x6e c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_clear_bits_lib.o)
+ .debug_line    0x00000b4a       0x6c c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_bits_lib.o)
+ .debug_line    0x00000bb6        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(_ports_tbl_libp.o)
 
 .debug_frame    0x00000000      0x1e8
  *(.debug_frame)
@@ -997,272 +1005,283 @@ LOAD data_init
  .data          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(general-exception.o)
 
 .bss%z37        0x00000000        0x0
- .bss           0x00000000        0x0 addrmap.o
+ .bss           0x00000000        0x0 pic.o
 
 .data%z38       0x00000000        0x0
- .data          0x00000000        0x0 addrmap.o
+ .data          0x00000000        0x0 pic.o
 
 .bss%z39        0x00000000        0x0
- .bss           0x00000000        0x0 exception.o
+ .bss           0x00000000        0x0 addrmap.o
 
 .data%z40       0x00000000        0x0
+ .data          0x00000000        0x0 addrmap.o
+
+.bss%z41        0x00000000        0x0
+ .bss           0x00000000        0x0 exception.o
+
+.data%z42       0x00000000        0x0
  .data          0x00000000        0x0 exception.o
 
-.mdebug.abi32%z41
+.mdebug.abi32%z43
                 0x00000000        0x0
  .mdebug.abi32  0x00000000        0x0 led.o
 
-.bss%z42        0x00000000        0x0
+.bss%z44        0x00000000        0x0
  .bss           0x00000000        0x0 led.o
 
-.data%z43       0x00000000        0x0
+.data%z45       0x00000000        0x0
  .data          0x00000000        0x0 led.o
 
-.bss%z44        0x00000000        0x0
+.bss%z46        0x00000000        0x0
  .bss           0x00000000        0x0 pcr.o
 
-.data%z45       0x00000000        0x0
+.data%z47       0x00000000        0x0
  .data          0x00000000        0x0 pcr.o
 
-.bss%z46        0x00000000        0x0
+.bss%z48        0x00000000        0x0
  .bss           0x00000000        0x0 mmregion.o
 
-.data%z47       0x00000000        0x0
+.data%z49       0x00000000        0x0
  .data          0x00000000        0x0 mmregion.o
 
-.bss%z48        0x00000000        0x0
+.bss%z50        0x00000000        0x0
  .bss           0x00000000        0x0 fubar.o
 
-.data%z49       0x00000000        0x0
+.data%z51       0x00000000        0x0
  .data          0x00000000        0x0 fubar.o
 
-.bss%z50        0x00000000        0x0
+.bss%z52        0x00000000        0x0
  .bss           0x00000000        0x0 event.o
 
-.data%z51       0x00000000        0x0
+.data%z53       0x00000000        0x0
  .data          0x00000000        0x0 event.o
 
-.bss%z52        0x00000000        0x0
+.bss%z54        0x00000000        0x0
  .bss           0x00000000        0x0 mutex.o
 
-.data%z53       0x00000000        0x0
+.data%z55       0x00000000        0x0
  .data          0x00000000        0x0 mutex.o
 
-.bss%z54        0x00000000        0x0
+.bss%z56        0x00000000        0x0
  .bss           0x00000000        0x0 init.o
 
-.data%z55       0x00000000        0x0
+.data%z57       0x00000000        0x0
  .data          0x00000000        0x0 init.o
 
-.bss%z56        0x00000000        0x0
+.bss%z58        0x00000000        0x0
  .bss           0x00000000        0x0 main.o
 
-.data%z57       0x00000000        0x0
+.data%z59       0x00000000        0x0
  .data          0x00000000        0x0 main.o
 
-.bss%z58        0x00000000        0x0
+.bss%z60        0x00000000        0x0
  .bss           0x00000000        0x0 simplemm.o
 
-.data%z59       0x00000000        0x0
+.data%z61       0x00000000        0x0
  .data          0x00000000        0x0 simplemm.o
 
-.bss%z60        0x00000000        0x0
+.bss%z62        0x00000000        0x0
  .bss           0x00000000        0x0 ctxswitch.o
 
-.data%z61       0x00000000        0x0
+.data%z63       0x00000000        0x0
  .data          0x00000000        0x0 ctxswitch.o
 
-.bss%z62        0x00000000        0x0
+.bss%z64        0x00000000        0x0
  .bss           0x00000000        0x0 interrupt.o
 
-.data%z63       0x00000000        0x0
+.data%z65       0x00000000        0x0
  .data          0x00000000        0x0 interrupt.o
 
-.bss%z64        0x00000000        0x0
+.bss%z66        0x00000000        0x0
  .bss           0x00000000        0x0 spinlock.o
 
-.data%z65       0x00000000        0x0
+.data%z67       0x00000000        0x0
  .data          0x00000000        0x0 spinlock.o
 
-.bss%z66        0x00000000        0x0
+.bss%z68        0x00000000        0x0
  .bss           0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib/crt0.o
 
-.data%z67       0x00000000        0x0
+.data%z69       0x00000000        0x0
  .data          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib/crt0.o
 
 .app_excpt      0x9d001000     0x1000
  .app_excpt     0x9d001000     0x1000 exception.o
 
-.text           0x9d000008      0x86c
- .text          0x9d000008      0x2b8 ctxswitch.o
+.text           0x9d000008      0x880
+ .text          0x9d000008      0x2ac ctxswitch.o
                 0x9d000008                krnl_scheduler_init
-                0x9d000074                krnl_create_init_thread
-                0x9d0000b4                krnl_create_thread
-                0x9d00023c                krnl_sleep_thread
- .text          0x9d0002c0      0x208 led.o
-                0x9d0002c0                init
-                0x9d000318                clearRed
-                0x9d000338                clearYellow
-                0x9d000358                clearGreen
-                0x9d000378                red
-                0x9d0003e8                yellow
-                0x9d000458                green
- .text          0x9d0004c8      0x158 exception.o
-                0x9d0004c8                krnl_return_to_epc
-                0x9d0004e0                krnl_return_to_epc_next
-                0x9d000504                krnl_exception_init
- .text          0x9d000620      0x134 main.o
-                0x9d000620                main
- .text          0x9d000754      0x120 mutex.o
-                0x9d000754                krnl_mutex_acquire
-                0x9d0007e8                krnl_mutex_release
-                0x9d00084c                krnl_mutex_init
-                0x9d000858                krnl_mutex_is_locked
+                0x9d000068                krnl_create_init_thread
+                0x9d0000a8                krnl_create_thread
+                0x9d000230                krnl_sleep_thread
+ .text          0x9d0002b4      0x208 led.o
+                0x9d0002b4                init
+                0x9d00030c                clearRed
+                0x9d00032c                clearYellow
+                0x9d00034c                clearGreen
+                0x9d00036c                red
+                0x9d0003dc                yellow
+                0x9d00044c                green
+ .text          0x9d0004bc      0x178 exception.o
+                0x9d0004bc                krnl_return_to_epc
+                0x9d0004d4                krnl_return_to_epc_next
+                0x9d0004f8                krnl_exception_init
+ .text          0x9d000634      0x134 main.o
+                0x9d000634                main
+ .text          0x9d000768      0x120 mutex.o
+                0x9d000768                krnl_mutex_acquire
+                0x9d0007fc                krnl_mutex_release
+                0x9d000860                krnl_mutex_init
+                0x9d00086c                krnl_mutex_is_locked
 
 .text.general_exception
-                0x9d000874       0xd0
+                0x9d000888       0xd0
  .text.general_exception
-                0x9d000874       0xd0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(general-exception.o)
-                0x9d000874                _general_exception_context
+                0x9d000888       0xd0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(general-exception.o)
+                0x9d000888                _general_exception_context
 
-.text           0x9d000944      0x1ec
- .text          0x9d000944       0xc0 interrupt.o
-                0x9d000944                krnl_request_softint
-                0x9d000968                krnl_register_interrupt
-                0x9d00099c                krnl_unregister_interrupt
-                0x9d0009c0                krnl_disable_interrupts
-                0x9d0009d4                krnl_restore_interrupts
-                0x9d0009ec                krnl_interrupt_dispatch
- .text          0x9d000a04       0xa8 simplemm.o
-                0x9d000a04                krnl_mm_init
-                0x9d000a28                krnl_paged_alloc
- .text          0x9d000aac       0x84 init.o
-                0x9d000aac                krnl_init
+.text           0x9d000958      0x27c
+ .text          0x9d000958       0xc0 interrupt.o
+                0x9d000958                krnl_request_softint
+                0x9d00097c                krnl_register_interrupt
+                0x9d0009b0                krnl_unregister_interrupt
+                0x9d0009d4                krnl_disable_interrupts
+                0x9d0009e8                krnl_restore_interrupts
+                0x9d000a00                krnl_interrupt_dispatch
+ .text          0x9d000a18       0xa8 simplemm.o
+                0x9d000a18                krnl_mm_init
+                0x9d000a3c                krnl_paged_alloc
+ .text          0x9d000ac0       0x8c init.o
+                0x9d000ac0                krnl_init
+ .text          0x9d000b4c       0x88 pic.o
+                0x9d000b4c                hal_get_timer_irq
+                0x9d000b54                hal_enable_timer
+                0x9d000bac                hal_clear_timer_interrupt
+                0x9d000bc0                hal_disable_timer
 
-.rodata         0x9d000b30       0x54
- .rodata        0x9d000b30       0x54 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(_ports_tbl_libp.o)
-                0x9d000b30                PortRegTbl
+.rodata         0x9d000bd4       0x54
+ .rodata        0x9d000bd4       0x54 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(_ports_tbl_libp.o)
+                0x9d000bd4                PortRegTbl
 
-.text           0x9d000b84       0x8c
- .text          0x9d000b84       0x48 mmregion.o
-                0x9d000b84                krnl_mmregion_alloc
-                0x9d000bac                krnl_mmregion_init
- .text          0x9d000bcc       0x44 pcr.o
-                0x9d000bcc                krnl_pcr_alloc
+.text           0x9d000c28       0x8c
+ .text          0x9d000c28       0x48 mmregion.o
+                0x9d000c28                krnl_mmregion_alloc
+                0x9d000c50                krnl_mmregion_init
+ .text          0x9d000c70       0x44 pcr.o
+                0x9d000c70                krnl_pcr_alloc
 
 .text.PORTSetPinsDigitalIn
-                0x9d000c10       0x40
+                0x9d000cb4       0x40
  .text.PORTSetPinsDigitalIn
-                0x9d000c10       0x40 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_in_lib.o)
-                0x9d000c10                PORTSetPinsDigitalIn
+                0x9d000cb4       0x40 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_in_lib.o)
+                0x9d000cb4                PORTSetPinsDigitalIn
 
 .text.PORTSetPinsDigitalOut
-                0x9d000c50       0x40
+                0x9d000cf4       0x40
  .text.PORTSetPinsDigitalOut
-                0x9d000c50       0x40 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_out_lib.o)
-                0x9d000c50                PORTSetPinsDigitalOut
+                0x9d000cf4       0x40 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_out_lib.o)
+                0x9d000cf4                PORTSetPinsDigitalOut
 
-.text           0x9d000c90       0x38
- .text          0x9d000c90       0x38 spinlock.o
-                0x9d000c90                krnl_spinlock_acquire
-                0x9d000cb4                krnl_spinlock_release
-                0x9d000cc0                krnl_spinlock_init
+.text           0x9d000d34       0x38
+ .text          0x9d000d34       0x38 spinlock.o
+                0x9d000d34                krnl_spinlock_acquire
+                0x9d000d58                krnl_spinlock_release
+                0x9d000d64                krnl_spinlock_init
 
 .text.PORTReadBits
-                0x9d000cc8       0x28
+                0x9d000d6c       0x28
  .text.PORTReadBits
-                0x9d000cc8       0x28 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_read_bits_lib.o)
-                0x9d000cc8                PORTReadBits
+                0x9d000d6c       0x28 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_read_bits_lib.o)
+                0x9d000d6c                PORTReadBits
 
 .text.PORTClearBits
-                0x9d000cf0       0x28
+                0x9d000d94       0x28
  .text.PORTClearBits
-                0x9d000cf0       0x28 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_clear_bits_lib.o)
-                0x9d000cf0                PORTClearBits
+                0x9d000d94       0x28 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_clear_bits_lib.o)
+                0x9d000d94                PORTClearBits
 
 .text.PORTSetBits
-                0x9d000d18       0x28
+                0x9d000dbc       0x28
  .text.PORTSetBits
-                0x9d000d18       0x28 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_bits_lib.o)
-                0x9d000d18                PORTSetBits
+                0x9d000dbc       0x28 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_bits_lib.o)
+                0x9d000dbc                PORTSetBits
 
-.text           0x9d000d40       0x48
- .text          0x9d000d40       0x20 event.o
-                0x9d000d40                krnl_event_init
-                0x9d000d48                krnl_event_wait
-                0x9d000d50                krnl_event_signal
-                0x9d000d58                krnl_event_is_signalled
- .text          0x9d000d60       0x18 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-nmi-handler.o)
-                0x9d000d60                _nmi_handler
- .text          0x9d000d78       0x10 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib/crt0.o
-                0x9d000d80                __crt0_exit
+.text           0x9d000de4       0x48
+ .text          0x9d000de4       0x20 event.o
+                0x9d000de4                krnl_event_init
+                0x9d000dec                krnl_event_wait
+                0x9d000df4                krnl_event_signal
+                0x9d000dfc                krnl_event_is_signalled
+ .text          0x9d000e04       0x18 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-nmi-handler.o)
+                0x9d000e04                _nmi_handler
+ .text          0x9d000e1c       0x10 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib/crt0.o
+                0x9d000e24                __crt0_exit
 
 .text._general_exception_handler
-                0x9d000d88        0xc
+                0x9d000e2c        0xc
  .text._general_exception_handler
-                0x9d000d88        0xc c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-general-exception-handler.o)
-                0x9d000d88                _general_exception_handler
+                0x9d000e2c        0xc c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-general-exception-handler.o)
+                0x9d000e2c                _general_exception_handler
 
 .text._bootstrap_exception_handler
-                0x9d000d94        0xc
+                0x9d000e38        0xc
  .text._bootstrap_exception_handler
-                0x9d000d94        0xc c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-bootstrap-exception-handler.o)
-                0x9d000d94                _bootstrap_exception_handler
+                0x9d000e38        0xc c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-bootstrap-exception-handler.o)
+                0x9d000e38                _bootstrap_exception_handler
 
-.text           0x9d000da0       0x10
- .text          0x9d000da0        0x8 fubar.o
-                0x9d000da0                krnl_fubar
- .text          0x9d000da8        0x8 addrmap.o
-                0x9d000da8                KRNL_CONTEXT_ADDR
-                0x9d000dac                KRNL_STACK_ADDR
+.text           0x9d000e44       0x10
+ .text          0x9d000e44        0x8 fubar.o
+                0x9d000e44                krnl_fubar
+ .text          0x9d000e4c        0x8 addrmap.o
+                0x9d000e4c                KRNL_CONTEXT_ADDR
+                0x9d000e50                KRNL_STACK_ADDR
 
 .text._on_reset
-                0x9d000db0        0x8
+                0x9d000e54        0x8
  .text._on_reset
-                0x9d000db0        0x8 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-reset.o)
-                0x9d000db0                _on_reset
+                0x9d000e54        0x8 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-reset.o)
+                0x9d000e54                _on_reset
 
 .text._on_bootstrap
-                0x9d000db8        0x8
+                0x9d000e5c        0x8
  .text._on_bootstrap
-                0x9d000db8        0x8 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-bootstrap.o)
-                0x9d000db8                _on_bootstrap
+                0x9d000e5c        0x8 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-bootstrap.o)
+                0x9d000e5c                _on_bootstrap
 
-.dinit          0x9d000dc0        0x4
- .dinit         0x9d000dc0        0x4 data_init
-
-.text%z68       0x00000000        0x0
- .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib/./proc/32MX360F512L\processor.o
-
-.text%z69       0x00000000        0x0
- .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(_ports_tbl_libp.o)
+.dinit          0x9d000e64        0x4
+ .dinit         0x9d000e64        0x4 data_init
 
 .text%z70       0x00000000        0x0
- .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_bits_lib.o)
+ .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib/./proc/32MX360F512L\processor.o
 
 .text%z71       0x00000000        0x0
- .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_clear_bits_lib.o)
+ .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(_ports_tbl_libp.o)
 
 .text%z72       0x00000000        0x0
- .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_read_bits_lib.o)
+ .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_bits_lib.o)
 
 .text%z73       0x00000000        0x0
- .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_out_lib.o)
+ .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_clear_bits_lib.o)
 
 .text%z74       0x00000000        0x0
- .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_in_lib.o)
+ .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_read_bits_lib.o)
 
 .text%z75       0x00000000        0x0
- .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-bootstrap.o)
+ .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_out_lib.o)
 
 .text%z76       0x00000000        0x0
- .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-reset.o)
+ .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libmchp_peripheral_32MX360F512L.a(port_set_pins_digital_in_lib.o)
 
 .text%z77       0x00000000        0x0
- .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-bootstrap-exception-handler.o)
+ .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-bootstrap.o)
 
 .text%z78       0x00000000        0x0
- .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-general-exception-handler.o)
+ .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-reset.o)
 
 .text%z79       0x00000000        0x0
+ .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-bootstrap-exception-handler.o)
+
+.text%z80       0x00000000        0x0
+ .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-general-exception-handler.o)
+
+.text%z81       0x00000000        0x0
  .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(general-exception.o)
