@@ -57,6 +57,9 @@ krnl_return_to_epc:
 	addi $t1, $k1, 0x190
 	bne $t1, $t0, nestedexcret
 
+	# Unset exception active
+	sw $zero, 0x8C($k1)
+
 	# Pop temps back
 	lw $t0, 0($sp)
 	lw $t1, 4($sp)
@@ -85,6 +88,9 @@ krnl_return_to_epc_next:
 	addi $t0, $sp, 0x18
 	addi $t1, $k1, 0x190
 	bne $t1, $t0, nestedexcret
+
+	# Unset exception active
+	sw $zero, 0x8C($k1)
 
 	# Pop temps back
 	lw $t0, 0($sp)
@@ -126,17 +132,26 @@ krnl_exception_init:
 	jr $ra
 
 krnl_interrupt_handler:
-	# Save interrupt handling context
+	# Disable interrupts
 	di
-	mfc0 $k0, $12 # STATUS
-	ori $k0, $k0, 0x1
+
+	# Check if an exception is already active
+	lw $k0, 0x8C($k1)
+	bne $k0, $zero, interrupt_resume # Yes!
 
 	# Switch to kernel-mode thread stack
 	sw $sp, 0x194($k1)
 	lw $sp, 0x198($k1)
 
+	# Exception is active
+	li $k0, 0x01
+	sw $k0, 0x8C($k1)
+
+interrupt_resume:
 	# Save the status register
 	addi $sp, $sp, -0x4
+	mfc0 $k0, $12 # STATUS
+	ori $k0, $k0, 0x1
 	sw $k0, 0($sp)
 
 	# Save the EPC register
@@ -189,14 +204,25 @@ ispurious:
 krnl_exception_handler:
 	# Save interrupt handling context
 	di
-	mfc0 $k0, $12 # STATUS
-	andi $k0, $k0, 0xFFFD
-	mtc0 $k0, $12
-	ori $k0, $k0, 0x3
+
+	# Check if an exception is already active
+	lw $k0, 0x8C($k1)
+	bne $k0, $zero, exception_resume # Yes!
 
 	# Switch to kernel-mode thread stack
 	sw $sp, 0x194($k1)
 	lw $sp, 0x198($k1)
+
+	# Exception is active
+	li $k0, 0x01
+	sw $k0, 0x8C($k1)
+
+exception_resume:
+	# Get the status register
+	mfc0 $k0, $12 # STATUS
+	andi $k0, $k0, 0xFFFC
+	mtc0 $k0, $12
+	ori $k0, $k0, 0x3
 
 	# Save the status register
 	addi $sp, $sp, -0x4

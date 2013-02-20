@@ -28,7 +28,7 @@
 # 0x80 Thread PC
 # 0x84 HI register
 # 0x88 LO register
-# 0x8C System thread
+# 0x8C Exception active
 # 0x90 End of kernel-mode thread stack
 # 0x190 Beginning of kernel-mode thread stack
 # 0x194 Saved user-mode stack pointer
@@ -81,6 +81,9 @@ krnl_scheduler_timer:
 	addi $t0, $sp, 0x1C
 	addi $t1, $k1, 0x190
 	bne $t1, $t0, nestedexcret
+
+	# Unset exception active
+	sw $zero, 0x8C($k1)
 
 	# Pop saved variables off the stack before freezing
 	lw $ra, 0($sp)
@@ -146,9 +149,8 @@ krnl_create_init_thread:
 	# Write the next thread
 	sw $zero, 0x70($k1)
 
-	# We're a system thread
-	li $t1, 0x01
-	sw $t1, 0x8C($k1)
+	# No exception active
+	sw $zero, 0x8C($k1)
 
 	# Write the current kmode stack pointer
 	addi $t1, $k1, 0x190
@@ -270,7 +272,7 @@ krnl_create_thread:
 	# Write the wait queue entry
 	sw $zero, 0x7C($k1)
 
-	# We're not system thread
+	# No exception active
 	sw $zero, 0x8C($k1)
 
 	# Write the current kmode stack pointer
@@ -303,7 +305,7 @@ cyclethreads:
 	lw $t4, 0x74($k1)
 
 	# Check if we've already cycled
-	bne $t5, $zero, idle
+	bne $t5, $zero, toidle
 
 	# Grab the head of the list
 	lw $t0, 0x8($t4)
@@ -312,12 +314,19 @@ cyclethreads:
 	addi $t5, $zero, 0x1
 
 	# If there are no other threads, idle
-	beq $t0, $zero, idle
+	beq $t0, $zero, toidle
 
 testforblocked:
 	# Check if the thread is blocked
 	lw $t2, 0x78($t0)
 	bne $t2, $zero, schedloop
+
+	# Load the PCR
+	lw $t4, 0x74($k1)
+
+	# Check if this is a switch from the idle thread
+	lw $t3, 0x0C($t4)
+	bne $t3, $k1, fromidle
 
 	# Switch to new thread
 	addi $k1, $t0, 0x0
@@ -325,9 +334,22 @@ testforblocked:
 	# Resume it
 	j krnl_unfreeze_thread
 
-idle:
+fromidle:
+	# Switch to new thread
+	addi $k1, $t0, 0x0
+
+	# Exit low power mode
+	jal hal_exit_low_power_mode
+
+	# Resume it
+	j krnl_unfreeze_thread
+
+toidle:
 	# Load the idle thread (PCR is in $t4)
 	lw $k1, 0x0C($t4)
+
+	# Set the platform to low power mode
+	jal hal_enter_low_power_mode
 
 	# Unfreeze the idle thread
 	j krnl_unfreeze_thread

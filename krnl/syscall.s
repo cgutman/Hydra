@@ -12,10 +12,6 @@ krnl_syscall_dispatch:
 	# Enable interrupts
 	ei
 
-
-	#li $a0, 0x00
-	#jal krnl_request_softint
-
 	# Restore the return address
 	lw $ra, 0($sp)
 	addi $sp, $sp, 0x4

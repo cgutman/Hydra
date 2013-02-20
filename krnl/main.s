@@ -110,11 +110,11 @@ test1:
 
 		addi $a1, $a1, 0x1
 
-		syscall
+		#syscall
 
 		addi $a1, $a1, 0x1
 
-		break
+		#break
 
 		jal clearRed
 
@@ -134,13 +134,13 @@ test2:
 
 		addi $a1, $a1, 0x1
 
-		syscall
+		#syscall
 
 		addi $a1, $a1, 0x1
 
 		jal clearYellow
 
-		break
+		#break
 
 		addi $a0, $s0, 0x0
 		jal krnl_mutex_release
@@ -158,13 +158,13 @@ test3:
 
 		addi $a1, $a1, 0x1
 
-		syscall
+		#syscall
 
 		addi $a1, $a1, 0x1
 
 		jal clearGreen
 
-		break
+		#break
 
 		addi $a0, $s0, 0x0
 		jal krnl_mutex_release
