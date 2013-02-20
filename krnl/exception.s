@@ -21,7 +21,7 @@ krnl_interrupt:
 .text
 krnl_exception_return:
 	# Restore exception state
-	mtc0 $k0, $13
+	mtc0 $k0, $12
 
 	# Restore k0
 	lw $k0, KRNL_CONTEXT_ADDR
@@ -79,7 +79,7 @@ krnl_exception_init:
 
 krnl_interrupt_handler:
 	# Save interrupt handling context
-	mfc0 $k0, $13 # STATUS
+	mfc0 $k0, $12 # STATUS
 	di
 
 	# Store a few temporaries for us to use
@@ -122,8 +122,9 @@ ispurious:
 	j krnl_return_to_epc
 
 krnl_exception_handler:
-	# Restore k0 after it was clobbered by the jump
-	lw $k0, KRNL_CONTEXT_ADDR
+	# Save interrupt handling context
+	mfc0 $k0, $12 # STATUS
+	di
 
 	# Store a few temporaries for us to use
 	addi $sp, $sp, -0x10
@@ -143,6 +144,10 @@ krnl_exception_handler:
 	li $t2, 8
 	beq $t1, $t2, syscallreq
 
+	# Check for breakpoint
+	li $t2, 9
+	beq $t1, $t2, breakpoint
+
 	# Check if it's an illegal load
 	li $t2, 4
 	beq $t1, $t2, badload
@@ -158,10 +163,6 @@ krnl_exception_handler:
 	# Check for data bus error
 	li $t2, 7
 	beq $t1, $t2, dbus
-
-	# Check for breakpoint
-	li $t2, 9
-	beq $t1, $t2, breakpoint
 
 	# Check for reserved instruction
 	li $t2, 10

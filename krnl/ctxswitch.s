@@ -47,7 +47,7 @@ krnl_scheduler_init:
 	jal krnl_register_interrupt
 
 	# Start the timer
-	li $a0, 0xFF00
+	li $a0, 0x1000
 	jal hal_enable_timer
 
 	# Restore the return address
@@ -116,6 +116,10 @@ krnl_create_init_thread:
 
 	# Write the next thread
 	sw $zero, 0x70($k1)
+
+	# Mask interrupts for switching
+	mfc0 $k0, $12 # STATUS
+	di
 
 	# Unfreeze the thread
 	j krnl_unfreeze_thread
@@ -229,6 +233,10 @@ krnl_create_thread:
 	# Write the wait queue entry
 	sw $zero, 0x7C($k1)
 
+	# Mask interrupts for switching
+	mfc0 $k0, $12 # STATUS
+	di
+
 	# Unfreeze the thread
 	j krnl_unfreeze_thread
 
@@ -338,6 +346,10 @@ krnl_freeze_thread:
 	j krnl_schedule_new_thread
 
 krnl_sleep_thread:
+	# Mask interrupts for switching
+	mfc0 $k0, $12 # STATUS
+	di
+
 	# Return address is the PC
 	sw $ra, 0x80($k1)
 
@@ -345,13 +357,13 @@ krnl_sleep_thread:
 	j krnl_freeze_thread
 
 krnl_unfreeze_thread:
-	# Check if we're in an interrupt context
-	lw $t0, KRNL_CONTEXT_ADDR
-	bne $t0, $k0, krnl_interrupt_unfreeze
-
 	# Store the new PC
 	lw $t0, 0x80($k1)
 	mtc0 $t0, $14
+
+	# Check if we're in an interrupt context
+	lw $t0, KRNL_CONTEXT_ADDR
+	bne $t0, $k0, krnl_interrupt_unfreeze
 
 	# Restore HI and LO
 	lw $t0, 0x84($k1)
@@ -406,7 +418,7 @@ krnl_unfreeze_thread:
 	lw $ra, 0x6C($k1)
 
 	# Return to the old PC
-	eret
+	j krnl_exception_return
 
 krnl_interrupt_unfreeze:
 	# Restore HI and LO

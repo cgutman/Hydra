@@ -24,11 +24,19 @@
 
 # void krnl_init()
 krnl_init:
-	# Save the return location (destroys $s0 but that doesn't matter)
-	addi $s0, $ra, 0x0
-
 	# Setup the kernel context
 	lw $k0, KRNL_CONTEXT_ADDR
+
+	# Setup init thread's stack (destroys existing stack but doesn't matter)
+	lw $sp, KRNL_STACK_ADDR
+
+	# Push the return address onto the new stack so it is saved until after thread creation
+	addi $sp, $sp, -0x4
+	sw $ra, 0($sp)
+
+	# Setup exception handling
+	jal krnl_exception_init
+	bne $v0, $zero, initfailed
 
 	# Initialize the mutex contention lock
 	addi $a0, $k0, 0x38
@@ -38,13 +46,6 @@ krnl_init:
 	jal krnl_mmregion_init
 	bne $v0, $zero, initfailed # Check for init failure
 
-	# Setup init thread's stack (destroys existing stack but doesn't matter)
-	lw $sp, KRNL_STACK_ADDR
-
-	# Push the return address onto the new stack so it is saved until after thread creation
-	addi $sp, $sp, -0x4
-	sw $s0, 0($sp)
-
 	# Create this CPU's PCR
 	jal krnl_pcr_alloc
 	beq $v0, $zero, initfailed # Check for init failure
@@ -52,10 +53,6 @@ krnl_init:
 	# Create the system init thread
 	addi $a0, $v0, 0x0 # PCR is argument 0
 	jal krnl_create_init_thread
-
-	# Setup exception handling
-	jal krnl_exception_init
-	bne $v0, $zero, initfailed
 
 	# Setup the CPU scheduler
 	jal krnl_scheduler_init
