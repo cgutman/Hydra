@@ -28,8 +28,12 @@
 # 0x80 Thread PC
 # 0x84 HI register
 # 0x88 LO register
-# 0x8C End of stack
-# 0x18C Beginning of stack
+# 0x8C System thread
+# 0x90 End of kernel-mode thread stack
+# 0x190 Beginning of kernel-mode thread stack
+# 0x194 Saved user-mode stack pointer
+# 0x198 End of user-mode stack
+# 0x298 Beginning of user-mode stack
 #
 
 # int krnl_scheduler_init()
@@ -74,11 +78,15 @@ krnl_scheduler_timer:
 
 	# Pop saved variables off the stack before freezing
 	lw $ra, 0($sp)
-	lw $t0, 4($sp)
-	lw $t1, 8($sp)
-	lw $t2, 12($sp)
-	lw $a0, 16($sp)
-	addi $sp, $sp, 0x14
+	lw $k0, 4($sp)
+	lw $t0, 8($sp)
+	lw $t1, 12($sp)
+	lw $t2, 16($sp)
+	lw $a0, 20($sp)
+	addi $sp, $sp, 0x18
+
+	# Switch back to user-mode thread stack
+	lw $sp, 0x194($k1)
 
 	# Trigger the scheduler
 	j krnl_freeze_thread
@@ -92,7 +100,7 @@ krnl_create_init_thread:
 	addi $s1, $a0, 0x0
 
 	# Allocate the thread context (minus stack)
-	li $a0, 0x8C
+	li $a0, 0x198
 	jal krnl_mmregion_alloc
 	beq $v0, $zero, initthreadfailed
 
@@ -116,6 +124,10 @@ krnl_create_init_thread:
 
 	# Write the next thread
 	sw $zero, 0x70($k1)
+
+	# We're a system thread
+	li $t1, 0x01
+	sw $t1, 0x8C($k1)
 
 	# Mask interrupts for switching
 	mfc0 $k0, $12 # STATUS
@@ -195,7 +207,7 @@ krnl_create_thread:
 	addi $s3, $a3, 0x0
 
 	# Allocate the thread context
-	li $a0, 0x18C
+	li $a0, 0x29C
 	jal krnl_paged_alloc
 
 	# Save the old thread
@@ -224,7 +236,7 @@ krnl_create_thread:
 	sw $s0, 0x80($k1)
 
 	# Write the stack address
-	addi $t1, $k1, 0x18C
+	addi $t1, $k1, 0x298
 	sw $t1, 0x64($k1)
 
 	# Write the wait object pointer
@@ -232,6 +244,9 @@ krnl_create_thread:
 
 	# Write the wait queue entry
 	sw $zero, 0x7C($k1)
+
+	# We're not system thread
+	sw $zero, 0x8C($k1)
 
 	# Mask interrupts for switching
 	mfc0 $k0, $12 # STATUS

@@ -20,7 +20,7 @@ krnl_interrupt:
 
 .text
 krnl_exception_return:
-	# Restore exception state
+	# Write the old status value back
 	mtc0 $k0, $12
 
 	# Restore k0
@@ -29,16 +29,28 @@ krnl_exception_return:
 	eret
 
 krnl_return_to_epc:
+	# Disable interrupts
+	di
+
 	# Pop temps back
 	lw $t0, 0($sp)
 	lw $t1, 4($sp)
 	lw $t2, 8($sp)
 	lw $a0, 12($sp)
-	addi $sp, $sp, 0x10
+
+	# Pop the old status value off the stack
+	lw $k0, 16($sp)
+	addi $sp, $sp, 0x14
+
+
+	# Switch back to user-mode thread stack
+	lw $sp, 0x194($k1)
 
 	j krnl_exception_return
 
 krnl_return_to_epc_next:
+	# Disable interrupts
+	di
 
 	mfc0 $t0, $14 # Get EPC
 	addiu $t0, 0x4 # Next instruction
@@ -49,7 +61,13 @@ krnl_return_to_epc_next:
 	lw $t1, 4($sp)
 	lw $t2, 8($sp)
 	lw $a0, 12($sp)
-	addi $sp, $sp, 0x10
+
+	# Pop the old status value off the stack
+	lw $k0, 16($sp)
+	addi $sp, $sp, 0x14
+
+	# Switch back to user-mode thread stack
+	lw $sp, 0x194($k1)
 
 	j krnl_exception_return
 
@@ -79,8 +97,20 @@ krnl_exception_init:
 
 krnl_interrupt_handler:
 	# Save interrupt handling context
-	mfc0 $k0, $12 # STATUS
 	di
+	mfc0 $k0, $12 # STATUS
+	ori $k0, $k0, 0x1
+
+	# Switch to kernel-mode thread stack
+	sw $sp, 0x194($k1)
+	addi $sp, $k1, 0x190
+
+	# Save the status register
+	addi $sp, $sp, -0x4
+	sw $k0, 0($sp)
+
+	# Restore k0
+	lw $k0, KRNL_CONTEXT_ADDR
 
 	# Store a few temporaries for us to use
 	addi $sp, $sp, -0x10
@@ -123,8 +153,23 @@ ispurious:
 
 krnl_exception_handler:
 	# Save interrupt handling context
-	mfc0 $k0, $12 # STATUS
 	di
+	mfc0 $k0, $12 # STATUS
+	ori $k0, $k0, 0x1
+
+	# Switch to kernel-mode thread stack
+	sw $sp, 0x194($k1)
+	addi $sp, $k1, 0x190
+
+	# Save the status register
+	addi $sp, $sp, -0x4
+	sw $k0, 0($sp)
+
+	# Restore k0
+	lw $k0, KRNL_CONTEXT_ADDR
+
+	# Enable interrupts
+	ei
 
 	# Store a few temporaries for us to use
 	addi $sp, $sp, -0x10
@@ -184,7 +229,7 @@ breakpoint:
 	j krnl_return_to_epc_next
 
 syscallreq:
-	# Not supported yet
+	# Return
 	j krnl_return_to_epc_next
 
 badload:
