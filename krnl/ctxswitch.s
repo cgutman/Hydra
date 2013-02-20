@@ -32,8 +32,9 @@
 # 0x90 End of kernel-mode thread stack
 # 0x190 Beginning of kernel-mode thread stack
 # 0x194 Saved user-mode stack pointer
-# 0x198 End of user-mode stack
-# 0x298 Beginning of user-mode stack
+# 0x198 Current kernel-mode stack pointer
+# 0x19C End of user-mode stack
+# 0x29C Beginning of user-mode stack
 #
 
 # int krnl_scheduler_init()
@@ -70,23 +71,43 @@ krnl_scheduler_timer:
 	sw $ra, 0($sp)
 
 	# Return address is the EPC
-	mfc0 $t0, $14
+	lw $t0, 20($sp)
 	sw $t0, 0x80($k1)
 
 	# Reset the interrupt
 	jal hal_clear_timer_interrupt
 
+	# Check if this is a nested exception
+	addi $t0, $sp, 0x1C
+	addi $t1, $k1, 0x190
+	bne $t1, $t0, nestedexcret
+
 	# Pop saved variables off the stack before freezing
 	lw $ra, 0($sp)
-	lw $k0, 4($sp)
-	lw $t0, 8($sp)
-	lw $t1, 12($sp)
-	lw $t2, 16($sp)
-	lw $a0, 20($sp)
-	addi $sp, $sp, 0x18
+	lw $t0, 4($sp)
+	lw $t1, 8($sp)
+	lw $t2, 12($sp)
+	lw $a0, 16($sp)
+	lw $k0, 24($sp)
+	addi $sp, $sp, 0x1C
 
 	# Switch back to user-mode thread stack
 	lw $sp, 0x194($k1)
+
+	# Trigger the scheduler
+	j krnl_freeze_thread
+
+nestedexcret:
+	# Pop saved variables off the stack before freezing
+	lw $ra, 0($sp)
+	lw $t0, 4($sp)
+	lw $t1, 8($sp)
+	lw $t2, 12($sp)
+	lw $a0, 16($sp)
+	lw $k0, 24($sp)
+	addi $sp, $sp, 0x1C
+
+	# Don't switch back to user-mode thread stack
 
 	# Trigger the scheduler
 	j krnl_freeze_thread
@@ -100,7 +121,7 @@ krnl_create_init_thread:
 	addi $s1, $a0, 0x0
 
 	# Allocate the thread context (minus stack)
-	li $a0, 0x198
+	li $a0, 0x19C
 	jal krnl_mmregion_alloc
 	beq $v0, $zero, initthreadfailed
 
@@ -128,6 +149,10 @@ krnl_create_init_thread:
 	# We're a system thread
 	li $t1, 0x01
 	sw $t1, 0x8C($k1)
+
+	# Write the current kmode stack pointer
+	addi $t1, $k1, 0x190
+	sw $t1, 0x198($k1)
 
 	# Mask interrupts for switching
 	mfc0 $k0, $12 # STATUS
@@ -236,7 +261,7 @@ krnl_create_thread:
 	sw $s0, 0x80($k1)
 
 	# Write the stack address
-	addi $t1, $k1, 0x298
+	addi $t1, $k1, 0x29C
 	sw $t1, 0x64($k1)
 
 	# Write the wait object pointer
@@ -247,6 +272,10 @@ krnl_create_thread:
 
 	# We're not system thread
 	sw $zero, 0x8C($k1)
+
+	# Write the current kmode stack pointer
+	addi $t1, $k1, 0x190
+	sw $t1, 0x198($k1)
 
 	# Mask interrupts for switching
 	mfc0 $k0, $12 # STATUS

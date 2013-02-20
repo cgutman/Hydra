@@ -39,6 +39,7 @@ file_011=.
 file_012=.
 file_013=.
 file_014=.
+file_015=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -55,6 +56,7 @@ file_011=no
 file_012=no
 file_013=no
 file_014=no
+file_015=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -71,6 +73,7 @@ file_011=no
 file_012=no
 file_013=no
 file_014=no
+file_015=no
 [FILE_INFO]
 file_000=spinlock.s
 file_001=interrupt.s
@@ -87,6 +90,7 @@ file_011=C:\Users\Cameron\Documents\GitHub\Hydra\memtest_pic32\led.c
 file_012=exception.s
 file_013=addrmap.s
 file_014=pic.s
+file_015=syscall.s
 [SUITE_INFO]
 suite_guid={14495C23-81F8-43F3-8A44-859C583D7760}
 suite_state=

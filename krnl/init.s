@@ -22,6 +22,9 @@
 # 0x38 - Mutex contention lock
 # 
 
+syscallint:
+	j krnl_return_to_epc_next
+
 # void krnl_init()
 krnl_init:
 	# Setup the kernel context
@@ -61,6 +64,17 @@ krnl_init:
 	# Initialize the memory manager
 	jal krnl_mm_init
 	bne $v0, $zero, initfailed
+
+	li $a0, 0x00
+	la $a1, syscallint
+	jal krnl_register_interrupt
+
+	li $a0, 0x00
+	#jal krnl_request_softint
+
+	addi $a0, $a0, 0x0
+
+	syscall
 
 	# Restore the return location
 	lw $ra, 0($sp)
