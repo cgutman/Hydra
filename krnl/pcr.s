@@ -28,10 +28,6 @@ krnl_pcr_alloc:
 	andi $t0, $t0, 0x1FF
 	sw $t0, 0($v0)
 
-	# Write this thread as the current thread and idle thread
-	sw $k1, 0x04($v0)
-	sw $k1, 0x0C($v0)
-
 	# No running thread head right now
 	sw $zero, 0x08($v0)
 

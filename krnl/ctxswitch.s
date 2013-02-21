@@ -32,7 +32,7 @@
 # 0x90 End of kernel-mode thread stack
 # 0x190 Beginning of kernel-mode thread stack
 # 0x194 Saved user-mode stack pointer
-# 0x198 Current kernel-mode stack pointer
+# 0x198 Unused
 # 0x19C End of user-mode stack
 # 0x29C Beginning of user-mode stack
 #
@@ -110,8 +110,6 @@ nestedexcret:
 	lw $k0, 24($sp)
 	addi $sp, $sp, 0x1C
 
-	# Don't switch back to user-mode thread stack
-
 	# Trigger the scheduler
 	j krnl_freeze_thread
 
@@ -134,6 +132,10 @@ krnl_create_init_thread:
 	# Write the PCR address
 	sw $s1, 0x74($k1)
 
+	# Final PCR setup
+	sw $k1, 0x04($s1) # Current thread
+	sw $k1, 0x0C($s1) # Idle thread
+
 	# Write the starting address
 	sw $s0, 0x80($k1)
 
@@ -152,10 +154,6 @@ krnl_create_init_thread:
 	# No exception active
 	sw $zero, 0x8C($k1)
 
-	# Write the current kmode stack pointer
-	addi $t1, $k1, 0x190
-	sw $t1, 0x198($k1)
-
 	# Mask interrupts for switching
 	mfc0 $k0, $12 # STATUS
 	di
@@ -171,6 +169,10 @@ initthreadfailed:
 # Arg0 to Arg3 are optional
 #
 krnl_create_thread:
+
+	# Mask interrupts for switching
+	mfc0 $k0, $12 # STATUS
+	di
 
 	# Save the assembler temp
 	sw $at, 0x00($k1)
@@ -274,14 +276,6 @@ krnl_create_thread:
 
 	# No exception active
 	sw $zero, 0x8C($k1)
-
-	# Write the current kmode stack pointer
-	addi $t1, $k1, 0x190
-	sw $t1, 0x198($k1)
-
-	# Mask interrupts for switching
-	mfc0 $k0, $12 # STATUS
-	di
 
 	# Unfreeze the thread
 	j krnl_unfreeze_thread
@@ -427,10 +421,6 @@ krnl_unfreeze_thread:
 	lw $t0, 0x80($k1)
 	mtc0 $t0, $14
 
-	# Check if we're in an interrupt context
-	lw $t0, KRNL_CONTEXT_ADDR
-	bne $t0, $k0, krnl_interrupt_unfreeze
-
 	# Restore HI and LO
 	lw $t0, 0x84($k1)
 	lw $t1, 0x88($k1)
@@ -484,60 +474,4 @@ krnl_unfreeze_thread:
 	lw $ra, 0x6C($k1)
 
 	# Return to the old PC
-	j krnl_exception_return
-
-krnl_interrupt_unfreeze:
-	# Restore HI and LO
-	lw $t0, 0x84($k1)
-	lw $t1, 0x88($k1)
-	mthi $t0
-	mtlo $t1
-
-	# Restore at
-	lw $at, 0x00($k1)
-
-	# Restore v0 - v1
-	lw $v0, 0x04($k1)
-	lw $v1, 0x08($k1)
-
-	# Restore a0 - a3
-	lw $a0, 0x0C($k1)
-	lw $a1, 0x10($k1)
-	lw $a2, 0x14($k1)
-	lw $a3, 0x18($k1)
-
-	# Restore t0 - t7
-	lw $t0, 0x1C($k1)
-	lw $t1, 0x20($k1)
-	lw $t2, 0x24($k1)
-	lw $t3, 0x28($k1)
-	lw $t4, 0x2C($k1)
-	lw $t5, 0x30($k1)
-	lw $t6, 0x34($k1)
-	lw $t7, 0x38($k1)
-
-	# Restore s0 - s7
-	lw $s0, 0x3C($k1)
-	lw $s1, 0x40($k1)
-	lw $s2, 0x44($k1)
-	lw $s3, 0x48($k1)
-	lw $s4, 0x4C($k1)
-	lw $s5, 0x50($k1)
-	lw $s6, 0x54($k1)
-	lw $s7, 0x58($k1)
-
-	# Restore t8 - t9
-	lw $t8, 0x5C($k1)
-	lw $t9, 0x60($k1)
-
-	# Restore stack pointer
-	lw $sp, 0x64($k1)
-
-	# Restore the frame pointer
-	lw $fp, 0x68($k1)
-
-	# Restore the return address
-	lw $ra, 0x6C($k1)
-
-	# Return
 	j krnl_exception_return

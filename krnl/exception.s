@@ -11,11 +11,13 @@
 .align 12
 .skip 0x180
 krnl_exception:
+	di
 	la $k0, krnl_exception_handler
 	jr $k0
 
-.skip 0x70
+.skip 0x6C
 krnl_interrupt:
+	di
 	la $k0, krnl_interrupt_handler
 	jr $k0
 .align 0
@@ -132,16 +134,13 @@ krnl_exception_init:
 	jr $ra
 
 krnl_interrupt_handler:
-	# Disable interrupts
-	di
-
 	# Check if an exception is already active
 	lw $k0, 0x8C($k1)
 	bne $k0, $zero, interrupt_resume # Yes!
 
 	# Switch to kernel-mode thread stack
 	sw $sp, 0x194($k1)
-	lw $sp, 0x198($k1)
+	addi $sp, $k1, 0x190
 
 	# Exception is active
 	li $k0, 0x01
@@ -202,16 +201,13 @@ ispurious:
 	j krnl_return_to_epc
 
 krnl_exception_handler:
-	# Save interrupt handling context
-	di
-
 	# Check if an exception is already active
 	lw $k0, 0x8C($k1)
 	bne $k0, $zero, exception_resume # Yes!
 
 	# Switch to kernel-mode thread stack
 	sw $sp, 0x194($k1)
-	lw $sp, 0x198($k1)
+	addi $sp, $k1, 0x190
 
 	# Exception is active
 	li $k0, 0x01
