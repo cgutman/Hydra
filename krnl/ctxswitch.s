@@ -52,7 +52,7 @@ krnl_scheduler_init:
 	jal krnl_register_interrupt
 
 	# Start the timer
-	li $a0, 0x1000
+	li $a0, 0x100
 	jal hal_enable_timer
 
 	# Restore the return address
@@ -94,8 +94,16 @@ krnl_scheduler_timer:
 	lw $k0, 24($sp)
 	addi $sp, $sp, 0x1C
 
+	# Write the old status value back
+	ori $k0, $k0, 0x2 # EXL bit is set
+	mtc0 $k0, $12
+	ehb
+
 	# Switch back to user-mode thread stack
 	lw $sp, 0x194($k1)
+
+	# Restore k0
+	lw $k0, KRNL_CONTEXT_ADDR
 
 	# Trigger the scheduler
 	j krnl_freeze_thread
@@ -154,10 +162,6 @@ krnl_create_init_thread:
 	# No exception active
 	sw $zero, 0x8C($k1)
 
-	# Mask interrupts for switching
-	mfc0 $k0, $12 # STATUS
-	di
-
 	# Unfreeze the thread
 	j krnl_unfreeze_thread
 
@@ -170,9 +174,11 @@ initthreadfailed:
 #
 krnl_create_thread:
 
-	# Mask interrupts for switching
-	mfc0 $k0, $12 # STATUS
-	di
+	# Disable interrupts
+	mfc0 $k0, $12
+	ori $k0, $k0, 0x2 # EXL
+	mtc0 $k0, $12
+	lw $k0, KRNL_CONTEXT_ADDR
 
 	# Save the assembler temp
 	sw $at, 0x00($k1)
@@ -406,9 +412,11 @@ krnl_freeze_thread:
 	j krnl_schedule_new_thread
 
 krnl_sleep_thread:
-	# Mask interrupts for switching
-	mfc0 $k0, $12 # STATUS
-	di
+	# Disable interrupts
+	mfc0 $k0, $12
+	ori $k0, $k0, 0x2 # EXL
+	mtc0 $k0, $12
+	lw $k0, KRNL_CONTEXT_ADDR
 
 	# Return address is the PC
 	sw $ra, 0x80($k1)
@@ -417,9 +425,25 @@ krnl_sleep_thread:
 	j krnl_freeze_thread
 
 krnl_unfreeze_thread:
+	# Disable interrupts and mask EXL to allow EPC write
+	di
+	mfc0 $t0, $12
+	li $t1, 0xFFFFFFFD
+	and $t0, $t0, $t1
+	mtc0 $t0, $12
+	ehb
+
 	# Store the new PC
 	lw $t0, 0x80($k1)
 	mtc0 $t0, $14
+	ehb
+
+	# Restore interrupts and EXL
+	mfc0 $t0, $12
+	ori $t0, $t0, 0x2
+	mtc0 $t0, $12
+	ei
+	ehb
 
 	# Restore HI and LO
 	lw $t0, 0x84($k1)
@@ -473,5 +497,8 @@ krnl_unfreeze_thread:
 	# Restore the return address
 	lw $ra, 0x6C($k1)
 
+	# Restore k0
+	lw $k0, KRNL_CONTEXT_ADDR
+
 	# Return to the old PC
-	j krnl_exception_return
+	eret

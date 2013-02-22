@@ -1,7 +1,6 @@
 .globl krnl_return_to_epc
 .globl krnl_return_to_epc_next
 .globl krnl_exception_init
-.globl krnl_exception_return
 
 .set noat
 
@@ -11,27 +10,16 @@
 .align 12
 .skip 0x180
 krnl_exception:
-	di
 	la $k0, krnl_exception_handler
 	jr $k0
 
-.skip 0x6C
+.skip 0x70
 krnl_interrupt:
-	di
 	la $k0, krnl_interrupt_handler
 	jr $k0
 .align 0
 
 .text
-krnl_exception_return:
-	# Write the old status value back
-	mtc0 $k0, $12
-
-	# Restore k0
-	lw $k0, KRNL_CONTEXT_ADDR
-
-	eret
-
 nestedexcret:
 	# Pop temps back
 	lw $t0, 0($sp)
@@ -43,12 +31,23 @@ nestedexcret:
 	lw $k0, 20($sp)
 	addi $sp, $sp, 0x18
 
+	# Write the old status value back
+	ori $k0, $k0, 0x2 # EXL bit is set
+	mtc0 $k0, $12
+	ehb
+
+	# Restore k0
+	lw $k0, KRNL_CONTEXT_ADDR
+
 	# We don't jump back to user-mode stack
-	j krnl_exception_return
+	eret
 
 krnl_return_to_epc:
-	# Disable interrupts
-	di
+	# Reenter EXL
+	mfc0 $t0, $12
+	ori $t0, $t0, 0x2
+	mtc0 $t0, $12
+	ehb
 
 	# Pop the EPC off the stack
 	lw $t0, 16($sp)
@@ -72,14 +71,25 @@ krnl_return_to_epc:
 	lw $k0, 20($sp)
 	addi $sp, $sp, 0x18
 
+	# Write the old status value back
+	ori $k0, $k0, 0x2 # EXL bit is set
+	mtc0 $k0, $12
+	ehb
+
 	# Switch back to user-mode thread stack
 	lw $sp, 0x194($k1)
 
-	j krnl_exception_return
+	# Restore k0
+	lw $k0, KRNL_CONTEXT_ADDR
+
+	eret
 
 krnl_return_to_epc_next:
-	# Disable interrupts
-	di
+	# Reenter EXL
+	mfc0 $t0, $12
+	ori $t0, $t0, 0x2
+	mtc0 $t0, $12
+	ehb
 
 	# Pop the EPC off the stack
 	lw $t0, 16($sp)
@@ -104,10 +114,18 @@ krnl_return_to_epc_next:
 	lw $k0, 20($sp)
 	addi $sp, $sp, 0x18
 
+	# Write the old status value back
+	ori $k0, $k0, 0x2 # EXL bit is set
+	mtc0 $k0, $12
+	ehb
+
+	# Restore k0
+	lw $k0, KRNL_CONTEXT_ADDR
+
 	# Switch back to user-mode thread stack
 	lw $sp, 0x194($k1)
 
-	j krnl_exception_return
+	eret
 
 krnl_exception_init:
 	# Setup cause register
@@ -149,8 +167,7 @@ krnl_interrupt_handler:
 interrupt_resume:
 	# Save the status register
 	addi $sp, $sp, -0x4
-	mfc0 $k0, $12 # STATUS
-	ori $k0, $k0, 0x1
+	mfc0 $k0, $12
 	sw $k0, 0($sp)
 
 	# Save the EPC register
@@ -214,13 +231,8 @@ krnl_exception_handler:
 	sw $k0, 0x8C($k1)
 
 exception_resume:
-	# Get the status register
-	mfc0 $k0, $12 # STATUS
-	andi $k0, $k0, 0xFFFC
-	mtc0 $k0, $12
-	ori $k0, $k0, 0x3
-
 	# Save the status register
+	mfc0 $k0, $12
 	addi $sp, $sp, -0x4
 	sw $k0, 0($sp)
 

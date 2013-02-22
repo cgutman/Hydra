@@ -53,7 +53,8 @@ test00:
 	li $v1, 0x11
 	li $fp, 0x1BEEF
 
-	j test00
+t00:
+	j t00
 
 test0:
 	# Spawn a second thread
@@ -61,7 +62,6 @@ test0:
 	la $a0, test00
 	jal krnl_create_thread
 
-t0:
 	li $a0, 0x0
 	li $a1, 0x1
 	li $a2, 0x2
@@ -86,6 +86,7 @@ t0:
 	li $v1, 0x1
 	li $fp, 0xBEEF
 
+t0:
 	j t0
 
 test1:
@@ -110,11 +111,11 @@ test1:
 
 		addi $a1, $a1, 0x1
 
-		#syscall
+		syscall
 
 		addi $a1, $a1, 0x1
 
-		#break
+		break
 
 		jal clearRed
 
@@ -134,13 +135,13 @@ test2:
 
 		addi $a1, $a1, 0x1
 
-		#syscall
+		syscall
 
 		addi $a1, $a1, 0x1
 
 		jal clearYellow
 
-		#break
+		break
 
 		addi $a0, $s0, 0x0
 		jal krnl_mutex_release
@@ -158,13 +159,13 @@ test3:
 
 		addi $a1, $a1, 0x1
 
-		#syscall
+		syscall
 
 		addi $a1, $a1, 0x1
 
 		jal clearGreen
 
-		#break
+		break
 
 		addi $a0, $s0, 0x0
 		jal krnl_mutex_release

@@ -7,10 +7,15 @@ krnl_syscall_dispatch:
 	# Save the return address
 	addi $sp, $sp, -0x4
 	sw $ra, 0($sp)
-	sw $sp, 0x198($k1) # Update kernel stack location
 
-	# Enable interrupts
-	ei
+	# Enable interrupts by masking EXL
+	mfc0 $t0, $12
+	li $t1, 0xFFFFFFFD
+	and $t0, $t0, $t1
+	mtc0 $t0, $12
+	ehb
+
+	# TODO: Do stuff
 
 	# Restore the return address
 	lw $ra, 0($sp)
