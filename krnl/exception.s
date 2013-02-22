@@ -1,7 +1,8 @@
 .globl krnl_return_to_epc
 .globl krnl_return_to_epc_next
 .globl krnl_exception_init
-.globl krnl_exception_return
+
+.set noat
 
 .data
 
@@ -19,43 +20,90 @@ krnl_interrupt:
 .align 0
 
 .text
-krnl_exception_return:
+nestedexcret:
+	# Pop temps back
+	lw $t0, 0($sp)
+	lw $t1, 4($sp)
+	lw $t2, 8($sp)
+	lw $a0, 12($sp)
+
+	# Pop the old status value off the stack
+	lw $k0, 20($sp)
+	addi $sp, $sp, 0x18
+
 	# Write the old status value back
+	ori $k0, $k0, 0x2 # EXL bit is set
 	mtc0 $k0, $12
+	ehb
+
+	# Restore k0
+	lw $k0, KRNL_CONTEXT_ADDR
+
+	# We don't jump back to user-mode stack
+	eret
+
+krnl_return_to_epc:
+	# Reenter EXL
+	mfc0 $t0, $12
+	ori $t0, $t0, 0x2
+	mtc0 $t0, $12
+	ehb
+
+	# Pop the EPC off the stack
+	lw $t0, 16($sp)
+	mtc0 $t0, $14 # Set EPC
+
+	# Check if this is a nested exception
+	addi $t0, $sp, 0x18
+	addi $t1, $k1, 0x190
+	bne $t1, $t0, nestedexcret
+
+	# Unset exception active
+	sw $zero, 0x8C($k1)
+
+	# Pop temps back
+	lw $t0, 0($sp)
+	lw $t1, 4($sp)
+	lw $t2, 8($sp)
+	lw $a0, 12($sp)
+
+	# Pop the old status value off the stack
+	lw $k0, 20($sp)
+	addi $sp, $sp, 0x18
+
+	# Write the old status value back
+	ori $k0, $k0, 0x2 # EXL bit is set
+	mtc0 $k0, $12
+	ehb
+
+	# Switch back to user-mode thread stack
+	lw $sp, 0x194($k1)
 
 	# Restore k0
 	lw $k0, KRNL_CONTEXT_ADDR
 
 	eret
 
-krnl_return_to_epc:
-	# Disable interrupts
-	di
-
-	# Pop temps back
-	lw $t0, 0($sp)
-	lw $t1, 4($sp)
-	lw $t2, 8($sp)
-	lw $a0, 12($sp)
-
-	# Pop the old status value off the stack
-	lw $k0, 16($sp)
-	addi $sp, $sp, 0x14
-
-
-	# Switch back to user-mode thread stack
-	lw $sp, 0x194($k1)
-
-	j krnl_exception_return
-
 krnl_return_to_epc_next:
-	# Disable interrupts
-	di
+	# Reenter EXL
+	mfc0 $t0, $12
+	ori $t0, $t0, 0x2
+	mtc0 $t0, $12
+	ehb
 
-	mfc0 $t0, $14 # Get EPC
+	# Pop the EPC off the stack
+	lw $t0, 16($sp)
 	addiu $t0, 0x4 # Next instruction
 	mtc0 $t0, $14 # Set EPC to next instruction
 
+	# Check if this is a nested exception
+	addi $t0, $sp, 0x18
+	addi $t1, $k1, 0x190
+	bne $t1, $t0, nestedexcret
+
+	# Unset exception active
+	sw $zero, 0x8C($k1)
+
 	# Pop temps back
 	lw $t0, 0($sp)
 	lw $t1, 4($sp)
@@ -63,13 +111,21 @@ krnl_return_to_epc_next:
 	lw $a0, 12($sp)
 
 	# Pop the old status value off the stack
-	lw $k0, 16($sp)
-	addi $sp, $sp, 0x14
+	lw $k0, 20($sp)
+	addi $sp, $sp, 0x18
+
+	# Write the old status value back
+	ori $k0, $k0, 0x2 # EXL bit is set
+	mtc0 $k0, $12
+	ehb
+
+	# Restore k0
+	lw $k0, KRNL_CONTEXT_ADDR
 
 	# Switch back to user-mode thread stack
 	lw $sp, 0x194($k1)
 
-	j krnl_exception_return
+	eret
 
 krnl_exception_init:
 	# Setup cause register
@@ -96,16 +152,26 @@ krnl_exception_init:
 	jr $ra
 
 krnl_interrupt_handler:
-	# Save interrupt handling context
-	di
-	mfc0 $k0, $12 # STATUS
-	ori $k0, $k0, 0x1
+	# Check if an exception is already active
+	lw $k0, 0x8C($k1)
+	bne $k0, $zero, interrupt_resume # Yes!
 
 	# Switch to kernel-mode thread stack
 	sw $sp, 0x194($k1)
 	addi $sp, $k1, 0x190
 
+	# Exception is active
+	li $k0, 0x01
+	sw $k0, 0x8C($k1)
+
+interrupt_resume:
 	# Save the status register
+	addi $sp, $sp, -0x4
+	mfc0 $k0, $12
+	sw $k0, 0($sp)
+
+	# Save the EPC register
+	mfc0 $k0, $14
 	addi $sp, $sp, -0x4
 	sw $k0, 0($sp)
 
@@ -152,24 +218,31 @@ ispurious:
 	j krnl_return_to_epc
 
 krnl_exception_handler:
-	# Save interrupt handling context
-	di
-	mfc0 $k0, $12 # STATUS
-	ori $k0, $k0, 0x1
+	# Check if an exception is already active
+	lw $k0, 0x8C($k1)
+	bne $k0, $zero, exception_resume # Yes!
 
 	# Switch to kernel-mode thread stack
 	sw $sp, 0x194($k1)
 	addi $sp, $k1, 0x190
 
+	# Exception is active
+	li $k0, 0x01
+	sw $k0, 0x8C($k1)
+
+exception_resume:
 	# Save the status register
+	mfc0 $k0, $12
+	addi $sp, $sp, -0x4
+	sw $k0, 0($sp)
+
+	# Save the EPC register
+	mfc0 $k0, $14
 	addi $sp, $sp, -0x4
 	sw $k0, 0($sp)
 
 	# Restore k0
 	lw $k0, KRNL_CONTEXT_ADDR
-
-	# Enable interrupts
-	ei
 
 	# Store a few temporaries for us to use
 	addi $sp, $sp, -0x10
@@ -229,8 +302,8 @@ breakpoint:
 	j krnl_return_to_epc_next
 
 syscallreq:
-	# Return
-	j krnl_return_to_epc_next
+	# Call the syscall dispatcher
+	j krnl_syscall_dispatch
 
 badload:
 badstore:

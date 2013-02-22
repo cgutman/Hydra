@@ -2,6 +2,34 @@
 .globl hal_disable_timer
 .globl hal_get_timer_irq
 .globl hal_clear_timer_interrupt
+.globl hal_enter_low_power_mode
+.globl hal_exit_low_power_mode
+
+# void hal_enter_low_power_mode()
+hal_enter_low_power_mode:
+	# Set the reduced power bit
+	li $t1, 0x08000000
+
+	# Write this bit to CP0
+	mfc0 $t0, $12
+	or $t0, $t0, $t1
+	mtc0 $t0, $12
+
+	# Return
+	jr $ra
+
+# void hal_exit_low_power_mode()
+hal_exit_low_power_mode:
+	# Mask the reduced power bit
+	li $t1, 0xF7FFFFFF
+
+	# Write this bit to CP0
+	mfc0 $t0, $12
+	and $t0, $t0, $t1
+	mtc0 $t0, $12
+
+	# Return
+	jr $ra
 
 # int hal_get_timer_irq()
 hal_get_timer_irq:

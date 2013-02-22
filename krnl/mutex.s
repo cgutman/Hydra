@@ -67,7 +67,7 @@ waitforacquire:
 	addi $a0, $k0, 0x38
 	jal krnl_spinlock_release
 
-	jal krnl_sleep_thread # Sleep the thread until the mutex is released
+	jal krnl_yield_thread # Sleep the thread until the mutex is released
 
 	# Cleanup and return
 	j finalizeacquire
@@ -142,7 +142,7 @@ mutexhandoff:
 	jal krnl_spinlock_release
 
 	# Give the newly eligible thread a chance to run
-	jal krnl_sleep_thread
+	jal krnl_yield_thread
 
 	# Cleanup and return
 	j finalizerelease

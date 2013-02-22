@@ -10,6 +10,8 @@
 
 .text
 
+.set noat # This isn't always saved
+
 # void krnl_request_softint(int interrupt)
 krnl_request_softint:
 	li $t2, 0x1 # Setup bitshift
@@ -94,7 +96,7 @@ ret:
 # krnl_interrupt_dispatch(int interrupt)
 # NOTE: Only t0, t1, t2, and a0 are writable
 krnl_interrupt_dispatch:
-	lw $t0, KRNL_CONTEXT_ADDR # Load the interrupt vector table pointer
+	li $t0, 0x80000000 # Load the interrupt vector table pointer
 	sll $t1, $a0, 2 # Get the offset to the vector pointer
 	add $t0, $t0, $t1 # Add them to get the address of the vector pointer
 	lw $t0, 0($t0) # Load the vector
