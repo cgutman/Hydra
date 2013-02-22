@@ -10,6 +10,8 @@
 
 .text
 
+.set noat # This isn't always saved
+
 # void krnl_request_softint(int interrupt)
 krnl_request_softint:
 	li $t2, 0x1 # Setup bitshift

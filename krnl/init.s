@@ -20,6 +20,8 @@
 # 0x30 - Memory manager next pointer
 # 0x34 - Memory manager upper bound
 # 0x38 - Mutex contention lock
+# 0x3C - Syscall ordinal limit
+# 0x40 - Syscall table
 # 
 
 # void krnl_init()
@@ -61,6 +63,9 @@ krnl_init:
 	# Initialize the memory manager
 	jal krnl_mm_init
 	bne $v0, $zero, initfailed
+
+	# Initialize the syscall table
+	jal krnl_syscall_init
 
 	# Restore the return location
 	lw $ra, 0($sp)

@@ -1,5 +1,5 @@
 .globl krnl_create_thread
-.globl krnl_sleep_thread
+.globl krnl_yield_thread
 .globl krnl_create_init_thread
 .globl krnl_scheduler_init
 
@@ -326,7 +326,7 @@ testforblocked:
 
 	# Check if this is a switch from the idle thread
 	lw $t3, 0x0C($t4)
-	bne $t3, $k1, fromidle
+	beq $t3, $k1, fromidle
 
 	# Switch to new thread
 	addi $k1, $t0, 0x0
@@ -411,7 +411,7 @@ krnl_freeze_thread:
 
 	j krnl_schedule_new_thread
 
-krnl_sleep_thread:
+krnl_yield_thread:
 	# Disable interrupts
 	mfc0 $k0, $12
 	ori $k0, $k0, 0x2 # EXL
