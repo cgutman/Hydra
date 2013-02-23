@@ -60,11 +60,11 @@ krnl_syscall_init:
 	sw $t0, 0x28($t1)
 
 	# Ordinal 11 - print_character (SPIM)
-	la $t0, krnl_syscall_null
+	la $t0, krnl_uart_write
 	sw $t0, 0x2C($t1)
 
 	# Ordinal 12 - read_character (SPIM)
-	la $t0, krnl_syscall_null
+	la $t0, krnl_uart_read
 	sw $t0, 0x30($t1)
 
 	# Ordinal 13 - open (SPIM)

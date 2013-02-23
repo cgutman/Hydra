@@ -47,11 +47,15 @@ hal_enable_timer:
 	li $t0, 0xBF800820 # PR2
 	sw $a0, 0($t0)
 
-	li $t0, 0xBF8810B0 # IPC2
+	li $t0, 0xBF8810B4 # IPC2CLR
+	li $t1, 0x1F
+	sw $t1, 0($t0)
+
+	li $t0, 0xBF8810B8 # IPC2SET
 	li $t1, 0x04 # This generates IRQ 2
 	sw $t1, 0($t0)
 
-	li $t0, 0xBF881060 # IEC0
+	li $t0, 0xBF881068 # IEC0SET
 	li $t1, 0x100
 	sw $t1, 0($t0)
 

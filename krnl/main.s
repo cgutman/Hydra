@@ -48,11 +48,17 @@ test1:
 		li $v0, 19 # Acquire mutex
 		syscall
 
+		# Write a char
+		li $a0, 0x40
+		li $v0, 11 # print char
+		syscall
+
 		jal red
 
 		addi $a1, $a1, 0x1
 
-		li $v0, 18 # Sleep syscall
+		# Read the character back
+		li $v0, 12 # read char
 		syscall
 
 		addi $a0, $s0, 0x0
@@ -69,11 +75,18 @@ test2:
 		li $v0, 19 # Acquire mutex
 		syscall
 
+		# Write a char
+		li $a0, 0x41
+		li $v0, 11 # print char
+		syscall
+
 		jal yellow
 
 		addi $a1, $a1, 0x1
 
-		break
+		# Read the character back
+		li $v0, 12 # read char
+		syscall
 
 		addi $a0, $s0, 0x0
 		li $v0, 20
@@ -89,11 +102,18 @@ test3:
 		li $v0, 19 # Acquire mutex
 		syscall
 
+		# Write a char
+		li $a0, 0x42
+		li $v0, 11 # print char
+		syscall
+
 		jal green
 
 		addi $a1, $a1, 0x1
 
-		break
+		# Read the character back
+		li $v0, 12 # read char
+		syscall
 
 		addi $a0, $s0, 0x0
 		li $v0, 20
