@@ -4,7 +4,7 @@
 void init(void)
 {
 	// Configure system for max performance at 80 MHz
-//	SYSTEMConfigPerformance(80000000);
+	SYSTEMConfigPerformance(80000000);
 
 	// Make LED pins output
 	PORTSetPinsDigitalOut(IOPORT_D, BIT_0 | BIT_1 | BIT_2);

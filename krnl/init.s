@@ -23,18 +23,20 @@
 # 0x3C - Syscall ordinal limit
 # 0x40 - Syscall table
 # 
+# HACK: UM hack in krnl_init and krnl_create_thread
+#
 
-# void krnl_init()
+# void krnl_init(void* startAddress)
 krnl_init:
-	# Setup the kernel context
-	lw $k0, KRNL_CONTEXT_ADDR
-
 	# Setup init thread's stack (destroys existing stack but doesn't matter)
 	lw $sp, KRNL_STACK_ADDR
 
-	# Push the return address onto the new stack so it is saved until after thread creation
+	# Save starting address
 	addi $sp, $sp, -0x4
-	sw $ra, 0($sp)
+	sw $a0, 0($sp)
+
+	# Setup the kernel context
+	lw $k0, KRNL_CONTEXT_ADDR
 
 	# Setup exception handling
 	jal krnl_exception_init
@@ -52,9 +54,12 @@ krnl_init:
 	jal krnl_pcr_alloc
 	beq $v0, $zero, initfailed # Check for init failure
 
-	# Create the system init thread
+	# Create the system idle thread
 	addi $a0, $v0, 0x0 # PCR is argument 0
-	jal krnl_create_init_thread
+	la $a1, krnl_idle
+	jal krnl_create_idle_thread
+
+	# We're impersonating the idle thread now
 
 	# Setup the CPU scheduler
 	jal krnl_scheduler_init
@@ -67,12 +72,18 @@ krnl_init:
 	# Initialize the syscall table
 	jal krnl_syscall_init
 
-	# Restore the return location
-	lw $ra, 0($sp)
+	# Set the UM bit (although we remain in kernel-mode due to EXL)
+	mfc0 $t0, $12
+	#ori $t0, $t0, 0x10 # UM
+	mtc0 $t0, $12
+	ehb
+
+	# Pop starting address for user-mode
+	lw $a0, 0($sp)
 	addi $sp, $sp, 0x4
 
-	# Return to the idle thread
-	jr $ra
+	# Create the initial user-mode thread and start executing
+	j krnl_create_initial_user_thread
 
 initfailed:
 	jal krnl_fubar # Panic

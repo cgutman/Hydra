@@ -133,7 +133,7 @@ krnl_exception_init:
 	mtc0 $t0, $13
 
 	# Setup status register
-	li $t0, 0x00000000
+	li $t0, 0x00000003 # EXL and IE set
 	mtc0 $t0, $12
 
 	# Setup ebase
@@ -143,9 +143,6 @@ krnl_exception_init:
 	# Setup IntCtl
 	li $t0, 0x00000000
 	mtc0 $t0, $12, 1
-
-	# Interrupts are ok now
-	ei
 
 	# Return
 	li $v0, 0x0

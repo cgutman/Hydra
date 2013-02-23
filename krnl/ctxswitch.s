@@ -1,7 +1,7 @@
 .globl krnl_create_thread
 .globl krnl_yield_thread
-.globl krnl_create_init_thread
 .globl krnl_scheduler_init
+.globl krnl_create_initial_user_thread
 
 .set noat # $at can't be used here because we have to save it
 
@@ -52,7 +52,7 @@ krnl_scheduler_init:
 	jal krnl_register_interrupt
 
 	# Start the timer
-	li $a0, 0x100
+	li $a0, 0x1000
 	jal hal_enable_timer
 
 	# Restore the return address
@@ -121,62 +121,15 @@ nestedexcret:
 	# Trigger the scheduler
 	j krnl_freeze_thread
 
-# void krnl_create_init_thread(void* pcr)
-krnl_create_init_thread:
-	# Save the starting address
-	addi $s0, $ra, 0x0
-
-	# Save the PCR address
-	addi $s1, $a0, 0x0
-
-	# Allocate the thread context (minus stack)
-	li $a0, 0x19C
-	jal krnl_mmregion_alloc
-	beq $v0, $zero, initthreadfailed
-
-	# Load the thread context
-	addi $k1, $v0, 0x0
-
-	# Write the PCR address
-	sw $s1, 0x74($k1)
-
-	# Final PCR setup
-	sw $k1, 0x04($s1) # Current thread
-	sw $k1, 0x0C($s1) # Idle thread
-
-	# Write the starting address
-	sw $s0, 0x80($k1)
-
-	# Write the stack address (already setup)
-	sw $sp, 0x64($k1)
-
-	# Write the wait object pointer
-	sw $zero, 0x78($k1)
-
-	# Write the wait queue entry
-	sw $zero, 0x7C($k1)
-
-	# Write the next thread
-	sw $zero, 0x70($k1)
-
-	# No exception active
-	sw $zero, 0x8C($k1)
-
-	# Unfreeze the thread
-	j krnl_unfreeze_thread
-
-initthreadfailed:
-	jal krnl_fubar # Panic
-
 # void krnl_create_thread(void* starting_address, void* arg0, void* arg1, void* arg2)
 #
 # Arg0 to Arg3 are optional
 #
 krnl_create_thread:
 
-	# Disable interrupts
+	# Disable interrupts and set UM again
 	mfc0 $k0, $12
-	ori $k0, $k0, 0x2 # EXL
+	ori $k0, $k0, 0x02 # UM, EXL
 	mtc0 $k0, $12
 	lw $k0, KRNL_CONTEXT_ADDR
 
@@ -266,6 +219,51 @@ krnl_create_thread:
 	sw $s1, 0x0C($k1)
 	sw $s2, 0x10($k1)
 	sw $s3, 0x14($k1)
+
+	# Write the starting address
+	sw $s0, 0x80($k1)
+
+	# Write the stack address
+	addi $t1, $k1, 0x29C
+	sw $t1, 0x64($k1)
+
+	# Write the wait object pointer
+	sw $zero, 0x78($k1)
+
+	# Write the wait queue entry
+	sw $zero, 0x7C($k1)
+
+	# No exception active
+	sw $zero, 0x8C($k1)
+
+	# Unfreeze the thread
+	j krnl_unfreeze_thread
+
+# void krnl_create_initial_user_thread(void* start)
+krnl_create_initial_user_thread:
+	# Save the starting address
+	addi $s0, $a0, 0x0
+
+	# Allocate the thread context
+	li $a0, 0x29C
+	jal krnl_paged_alloc
+
+	# Save the old thread
+	addi $t2, $k1, 0x0
+
+	# Read the PCR address from the old thread
+	lw $t1, 0x74($k1)
+
+	# Load the thread context
+	addi $k1, $v0, 0x0
+
+	# Restore the PCR address pointer
+	sw $t1, 0x74($k1)
+
+	# Link us into the list
+	lw $t2, 0x08($t1) # Load the current head in $t2
+	sw $t2, 0x70($k1) # Store the current head into the next thread entry
+	sw $k1, 0x08($t1) # Store the current thread into the PCR's thread list head
 
 	# Write the starting address
 	sw $s0, 0x80($k1)
@@ -425,22 +423,20 @@ krnl_yield_thread:
 	j krnl_freeze_thread
 
 krnl_unfreeze_thread:
-	# Disable interrupts and mask EXL to allow EPC write
+	# Disable interrupts and mask EXL and UM to allow EPC write
 	di
 	mfc0 $t0, $12
-	li $t1, 0xFFFFFFFD
-	and $t0, $t0, $t1
-	mtc0 $t0, $12
+	li $t1, 0xFFFFFFED
+	and $t1, $t0, $t1
+	mtc0 $t1, $12
 	ehb
 
 	# Store the new PC
-	lw $t0, 0x80($k1)
-	mtc0 $t0, $14
+	lw $t2, 0x80($k1)
+	mtc0 $t2, $14
 	ehb
 
 	# Restore interrupts and EXL
-	mfc0 $t0, $12
-	ori $t0, $t0, 0x2
 	mtc0 $t0, $12
 	ei
 	ehb

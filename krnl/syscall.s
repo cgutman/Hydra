@@ -114,17 +114,21 @@ krnl_syscall_init:
 	jr $ra
 
 krnl_syscall_dispatch:
-	# Enable interrupts by masking EXL
-	mfc0 $t0, $12
-	li $t1, 0xFFFFFFFD
-	and $t0, $t0, $t1
-	mtc0 $t0, $12
-	ehb
-
 	# Check that the syscall is valid
 	lw $t0, 0x3C($k0)
 	sltu $t0, $v0, $t0
 	beq $t0, $zero, invalidsyscall
+
+	# Enable interrupts by masking EXL and UM
+	mfc0 $t0, $12
+	li $t1, 0xFFFFFFED
+	and $t1, $t0, $t1
+	mtc0 $t1, $12
+	ehb
+
+	# Save the old status reg
+	addi $sp, $sp, -0x4
+	sw $t0, 0($sp)
 
 	# Convert the ordinal to a pointer
 	sll $t0, $v0, 2 # Shift by 2 to get a pointer offset
@@ -157,6 +161,14 @@ krnl_syscall_dispatch:
 	lw $t9, 28($sp)
 	lw $at, 32($sp)
 	addi $sp, $sp, 0x24
+
+	# Restore status
+	lw $t0, 0($sp)
+	addi $sp, $sp, 0x4
+
+	# Write old status back
+	mtc0 $t0, $12
+	ehb
 
 	# Return to user-mode
 	j krnl_return_to_epc_next

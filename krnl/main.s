@@ -2,13 +2,17 @@
 
 .data
 
+
 .text
 main:
-	# Initialize the kernel
-	jal krnl_init
-
 	# Initialize the LEDs
 	jal init
+
+	# Initialize the kernel
+	la $a0, userstart
+	jal krnl_init
+
+userstart:
 
 	# Initialize the mutex
 	li $a0, 0x80004000
@@ -21,22 +25,14 @@ main:
 	li $v0, 21 # create thread
 	syscall
 
-	# This is the idle thread
-idle:
-
-	# Look for another thread to execute
-	li $v0, 18 # Sleep syscall
-	syscall
-
-	# We're back, just try again
-	j idle
+loop:
+	j loop
 
 test1:
-
-	# Spawn a second thread
-	addi $a1, $a0, 0x0 # Copy the lock pointer
+	# Start a new thread
 	la $a0, test2
-	li $v0, 21 # Create thread
+	li $a1, 0x80004000
+	li $v0, 21 # create thread
 	syscall
 
 	# Spawn a third thread
@@ -59,12 +55,6 @@ test1:
 		li $v0, 18 # Sleep syscall
 		syscall
 
-		addi $a1, $a1, 0x1
-
-		break
-
-		jal clearRed
-
 		addi $a0, $s0, 0x0
 		li $v0, 20
 		syscall # Release mutex
@@ -82,13 +72,6 @@ test2:
 		jal yellow
 
 		addi $a1, $a1, 0x1
-
-		li $v0, 18 # Sleep syscall
-		syscall
-
-		addi $a1, $a1, 0x1
-
-		jal clearYellow
 
 		break
 
@@ -109,13 +92,6 @@ test3:
 		jal green
 
 		addi $a1, $a1, 0x1
-
-		li $v0, 18 # Sleep syscall
-		syscall
-
-		addi $a1, $a1, 0x1
-
-		jal clearGreen
 
 		break
 
