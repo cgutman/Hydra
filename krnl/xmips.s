@@ -193,7 +193,7 @@ hal_init_hardware:
 	sw $t1, 0($t0)
 
 	li $t0, 0xBF805E08 # SPI1CONSET
-	li $t1, 0x8020 # On, Master
+	li $t1, 0x8120 # On, Master
 	sw $t1, 0($t0)
 
 	# ------ UART SETUP ------
@@ -369,8 +369,8 @@ hal_spi_write:
 spiwritewait:
 	li $t0, 0xBF805E10 # SPI1STAT
 	lw $t0, 0($t0)
-	andi $t0, $t0, 0x2 # SPITBF bit
-	beq $t0, $zero, spiwriteready
+	andi $t0, $t0, 0x8 # SPITBE bit
+	bne $t0, $zero, spiwriteready
 	j spiwritewait
 
 spiwriteready:
@@ -398,6 +398,14 @@ hal_spi_select:
 
 # void hal_spi_deselect()
 hal_spi_deselect:
+spideassertwait:
+	li $t0, 0xBF805E10 # SPI1STAT
+	lw $t0, 0($t0)
+	andi $t0, $t0, 0x800 # SPIBUSY
+	beq $t0, $zero, spideassertready
+	j spideassertwait
+
+spideassertready:
 	# Set all the CS pins high
 	la $t0, 0xBF886098 # PORTCSET
 	li $t1, 0x7
