@@ -310,5 +310,4 @@ reservedinst:
 coprocmissing:
 arithmetic:
 	# Terminate the thread
-	#j krnl_user_thread_exception
-	jal krnl_fubar
+	j krnl_user_thread_exception

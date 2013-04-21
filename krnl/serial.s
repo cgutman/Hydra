@@ -3,14 +3,58 @@
 .globl krnl_serial_read_string
 .globl krnl_serial_read_char
 
-
 .text
 # krnl_serial_read_char(port)
 krnl_serial_read_char:
 	j hal_uart_read
 
-# krnl_serial_read_string(port)
+# krnl_serial_read_string(port, char*, len)
 krnl_serial_read_string:
+	# Save s0-s2 and ra
+	addi $sp, $sp, -0x10
+	sw $ra, 0($sp)
+	sw $s0, 4($sp)
+	sw $s1, 8($sp)
+	sw $s2, 12($sp)
+
+	# Save arguments
+	addi $s0, $a0, 0x0
+	addi $s1, $a1, 0x0
+	addi $s2, $a2, -0x1 # Leave 1 space open for the NUL
+
+readloop:
+	# Check if we're out of buffer space
+	beq $s2, $zero, readdone
+
+	# Read in a new character
+	addi $a0, $s0, 0x0
+	jal krnl_serial_read_char
+
+	# Check if it's a null
+	beq $v0, $zero, readdone
+
+	# Check if it's a CR
+	li $t0, 0xD
+	beq $v0, $t0, readdone
+
+	# Write the character to the buffer
+	sb $v0, 0($s1)
+
+	# Increment buffer pointer and decrement buffer len
+	addi $s1, $s1, 0x01
+	addi $s2, $s2, -0x01
+	j readloop
+
+readdone:
+	# Add a NUL terminator
+	sb $zero, 0($s1)
+
+	# Restore stack
+	lw $ra, 0($sp)
+	lw $s0, 4($sp)
+	lw $s1, 8($sp)
+	lw $s2, 12($sp)
+	addi $sp, $sp, 0x10
 	jr $ra
 
 # krnl_serial_write_char(port, char)

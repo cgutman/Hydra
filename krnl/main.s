@@ -22,8 +22,6 @@ userstart:
 	li $v0, 4
 	syscall
 
-	jal drv_write_char_led
-
 	# Initialize the mutex
 	li $a0, 0x80004000
 	li $v0, 22 # mutex init
@@ -45,6 +43,10 @@ loop:
 	addi $a0, $s0, 0x0
 	li $v0, 11
 	syscall
+
+	# Write the character to SPI
+	addi $a0, $s0, 0x0
+	jal hal_spi_write
 
 	# If this is a carriage return, add a line feed
 	la $t0, cr

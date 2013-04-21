@@ -41,6 +41,27 @@ krnl_io_write_char:
 
 # int krnl_io_read_int()
 krnl_io_read_int:
+	# Save the return address first
+	addi $sp, $sp, -0x4
+	sw $ra, 0($sp)
+
+	# Allocate temporary buffer space for string
+	addi $sp, $sp, -0x20 # 32 characters (NUL included)
+
+	# Read the string in
+	li $a0, 2 # UART 2
+	addi $a1, $sp, 0x0
+	li $a2, 0x20
+	jal krnl_serial_read_string
+
+	# Decode the resulting string
+	addi $a0, $sp, 0x0
+	jal numlib_string_to_int
+
+	# Restore the stack
+	addi $sp, $sp, 0x20
+	lw $ra, 0($sp)
+	addi $sp, $sp, 0x04
 	jr $ra
 
 # float krnl_io_read_float()
@@ -53,9 +74,10 @@ krnl_io_read_double:
 
 # char* krnl_io_read_string()
 krnl_io_read_string:
+	addi $a2, $a1, 0x0
+	addi $a1, $a0, 0x0
 	li $a0, 2 # UART 2
-	#j krnl_serial_read_string
-	jr $ra
+	j krnl_serial_read_string
 
 # char krnl_io_read_char()
 krnl_io_read_char:
