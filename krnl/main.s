@@ -50,6 +50,8 @@ loop:
 
 	# Write the character to SPI
 	addi $a0, $s0, 0x0
+	sll $a0, $a0, 8
+	add $a0, $a0, $s0
 	jal drv_write_char_led
 
 	# If this is a carriage return, add a line feed
