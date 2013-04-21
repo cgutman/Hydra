@@ -2,7 +2,13 @@
 
 .data
 hi:
-.asciiz "Hello XMIPS\r\n"
+.asciiz "Welcome to Hydra\r\n"
+
+cr:
+.ascii "\r"
+
+lf:
+.ascii "\n"
 
 .text
 main:
@@ -11,9 +17,12 @@ main:
 	jal krnl_init
 
 userstart:
+	# Print a hello
 	la $a0, hi
 	li $v0, 4
 	syscall
+
+	jal drv_write_char_led
 
 	# Initialize the mutex
 	li $a0, 0x80004000
@@ -27,6 +36,25 @@ userstart:
 	syscall
 
 loop:
+	# Read a character in
+	la $v0, 12
+	syscall
+	addi $s0, $v0, 0x0
+
+	# Write the character back out
+	addi $a0, $s0, 0x0
+	li $v0, 11
+	syscall
+
+	# If this is a carriage return, add a line feed
+	la $t0, cr
+	lb $t1, 0($t0)
+	bne $s0, $t1, loop
+	la $t0, lf
+	lb $a0, 0($t0)
+	li $v0, 11
+	syscall
+
 	j loop
 
 test1:
@@ -60,6 +88,7 @@ test1:
 test2:
 	addi $s0, $a0, 0x0
 	li $a1, 0x0
+
 	t2:
 		addi $a0, $s0, 0x0
 		li $v0, 19 # Acquire mutex

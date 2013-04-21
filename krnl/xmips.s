@@ -7,12 +7,16 @@
 .globl hal_init_hardware
 .globl hal_uart_read
 .globl hal_uart_write
+.globl hal_spi_write
 
 .globl hal_xmips_blink_r
 .globl hal_xmips_blink_g
 .globl hal_xmips_blink_b
 
 .data
+hal_hello:
+.asciiz "XMIPS HAL: Hardware initialized\r\n"
+
 hal_max_uart:
 .word 0x04 # 3 UARTs (1 - 3)
 
@@ -168,6 +172,20 @@ hal_init_hardware:
 	li $t1, 0x7000
     sw $t1, 0($t0)
 
+	# Clear output on PORTG
+	li $t0, 0xBF886194
+	li $t1, 0xFFFF
+	sw $t1, 0($t0)
+
+	# ------ SPI SETUP -------
+	li $t0, 0xBF805E30 # SPI1BRG
+	li $t1, 0x50 # SPI clock is 0.5 MHz (assuming 40 MHz PBCLK)
+	sw $t1, 0($t0)
+
+	li $t0, 0xBF805E08 # SPI1CONSET
+	li $t1, 0x8020 # On, Master
+	sw $t1, 0($t0)
+
 	# ------ UART SETUP ------
 	la $t0, hal_max_uart
 	lw $t4, 0($t0) # Load the UART max
@@ -228,7 +246,7 @@ uart_setup_loop:
 
 	# Set the mode register
 	addi $t0, $t3, 0x8 # # UXMODESET
-	li $t1, 0x8040 # 8 N 1, enable UART, enable loopback
+	li $t1, 0x8000 # 8 N 1, enable UART
 	sw $t1, 0($t0)
 
 	# Init the next port
@@ -236,7 +254,10 @@ uart_setup_loop:
 	j uart_setup_loop
 
 uart_setup_done:
-	jr $ra
+	# Write the hello and return
+	li $a0, 2
+	la $a1, hal_hello
+	j krnl_serial_write_string
 
 
 # void krnl_uart_write(port, char)
@@ -288,14 +309,14 @@ uartreadready:
 # void hal_xmips_blink_r()
 hal_xmips_blink_r:
 	addi $s7, $ra, 0x0
-	li $a0, 12
+	li $a0, 13
     jal decodebit
 	addi $a0, $v0, 0x0
 	jal setgbit
 
 	jal waitforblinky
 
-	li $a0, 12
+	li $a0, 13
     jal decodebit
 	addi $a0, $v0, 0x0
 	jal cleargbit
@@ -304,14 +325,14 @@ hal_xmips_blink_r:
 # void hal_xmips_blink_g()
 hal_xmips_blink_g:
 	addi $s7, $ra, 0x0
-	li $a0, 13
+	li $a0, 14
     jal decodebit
 	addi $a0, $v0, 0x0
 	jal setgbit
 
 	jal waitforblinky
 
-	li $a0, 13
+	li $a0, 14
     jal decodebit
 	addi $a0, $v0, 0x0
 	jal cleargbit
@@ -320,15 +341,29 @@ hal_xmips_blink_g:
 # void hal_xmips_blink_b()
 hal_xmips_blink_b:
 	addi $s7, $ra, 0x0
-	li $a0, 14
+	li $a0, 12
     jal decodebit
 	addi $a0, $v0, 0x0
 	jal setgbit
 
 	jal waitforblinky
 
-	li $a0, 14
+	li $a0, 12
     jal decodebit
 	addi $a0, $v0, 0x0
 	jal cleargbit
 	jr $s7
+
+# void hal_spi_write(char)
+hal_spi_write:
+spiwritewait:
+	li $t0, 0xBF805E10 # SPI1STAT
+	lw $t0, 0($t0)
+	andi $t0, $t0, 0x2 # SPITBF bit
+	beq $t0, $zero, spiwriteready
+	j spiwritewait
+
+spiwriteready:
+	li $t0, 0xBF805E20 # SPI1BUF
+	sw $a0, 0($t0)
+	jr $ra

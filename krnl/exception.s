@@ -309,5 +309,6 @@ dbus:
 reservedinst:
 coprocmissing:
 arithmetic:
-	# Fatal exceptions (for kernel mode)
+	# Terminate the thread
+	#j krnl_user_thread_exception
 	jal krnl_fubar

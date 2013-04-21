@@ -60,8 +60,7 @@ krnl_syscall_init:
 	sw $t0, 0x28($t1)
 
 	# Ordinal 11 - print_character (SPIM)
-	#HACK ---- la $t0, krnl_io_write_char -----
-	la $t0, krnl_io_write_string
+	la $t0, krnl_io_write_char
 	sw $t0, 0x2C($t1)
 
 	# Ordinal 12 - read_character (SPIM)

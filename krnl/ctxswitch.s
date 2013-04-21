@@ -2,14 +2,20 @@
 .globl krnl_yield_thread
 .globl krnl_scheduler_init
 .globl krnl_create_initial_user_thread
+.globl krnl_user_thread_exception
 
 .set noat # $at can't be used here because we have to save it
 
 .data
+term_msg:
+.asciiz "Scheduler: Current thread killed due to unhandled exception\r\n"
+
+new_thread_msg:
+.asciiz "Scheduler: Created a new thread\r\n"
 
 .text
 
-# $gp is the thread context pointer (for now)
+# $k1 is the thread context pointer
 #
 # Thread context structure:
 # 0x00 $at
@@ -52,7 +58,7 @@ krnl_scheduler_init:
 	jal krnl_register_interrupt
 
 	# Start the timer
-	li $a0, 0x1000
+	li $a0, 0x2000
 	jal hal_enable_timer
 
 	# Restore the return address
@@ -194,6 +200,10 @@ krnl_create_thread:
 	addi $s2, $a2, 0x0
 	addi $s3, $a3, 0x0
 
+	# Print a debug message
+	la $a0, new_thread_msg
+	jal krnl_debug
+
 	# Allocate the thread context
 	li $a0, 0x29C
 	jal krnl_paged_alloc
@@ -283,6 +293,49 @@ krnl_create_initial_user_thread:
 
 	# Unfreeze the thread
 	j krnl_unfreeze_thread
+
+krnl_user_thread_exception:
+	la $a0, term_msg
+	jal krnl_io_write_string
+
+	lw $t1, 0x74($k1) # Load the PCR address
+	lw $t0, 0x08($t1) # Load the PCR's thread list head
+	addi $t3, $t0, 0x0 # Save this value for later
+	bne $t0, $k1, exceptionfindthread # If this is not at the front of the list, loop to find it
+
+	# The first thread one the run queue needs to die
+	lw $t2, 0x70($k1)
+	sw $t2, 0x08($t1)
+	j exceptionkilled
+
+	exceptionfindthread:
+		# Set the last thread
+		addi $t1, $t0, 0x0
+
+		# Lookup the next thread
+		lw $t0, 0x70($t0)
+
+		# Check if it's the thread we want
+		bne $t0, $k1, exceptionfindthread
+
+	# Load this thread's next pointer
+	lw $t2, 0x70($k1)
+
+	# Store that value to the previous thread's next pointer
+	sw $t2, 0x70($t1)
+
+exceptionkilled:
+	# Write the old status value back
+	ori $k0, $k0, 0x2 # EXL bit is set
+	mtc0 $k0, $12
+	ehb
+
+	# Restore k0
+	lw $k0, KRNL_CONTEXT_ADDR
+
+	# Switch contexts to allow the dispatcher to select a new thread
+	addi $k1, $t3, 0x0
+	j krnl_schedule_new_thread
 
 krnl_schedule_new_thread:
 	# Get the current thread
