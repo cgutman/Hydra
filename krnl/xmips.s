@@ -8,6 +8,8 @@
 .globl hal_uart_read
 .globl hal_uart_write
 .globl hal_spi_write
+.globl hal_spi_select
+.globl hal_spi_deselect
 
 .globl hal_xmips_blink_r
 .globl hal_xmips_blink_g
@@ -178,6 +180,14 @@ hal_init_hardware:
 	sw $t1, 0($t0)
 
 	# ------ SPI SETUP -------
+	li $t0, 0xBF886084 # TRISCCLR
+	li $t1, 0x7
+	sw $t1, 0($t0)
+
+	la $t0, 0xBF886098 # PORTCSET
+	li $t1, 0x7
+	sw $t1, 0($t0)
+
 	li $t0, 0xBF805E30 # SPI1BRG
 	li $t1, 0x50 # SPI clock is 0.5 MHz (assuming 40 MHz PBCLK)
 	sw $t1, 0($t0)
@@ -366,4 +376,30 @@ spiwritewait:
 spiwriteready:
 	li $t0, 0xBF805E20 # SPI1BUF
 	sw $a0, 0($t0)
+	jr $ra
+
+# void hal_spi_select(char)
+hal_spi_select:
+	# Save the return address
+	addi $sp, $sp, -0x4
+	sw $ra, 0($sp)
+
+	# Decode the bit
+	jal decodebit
+
+	# Set the pin low
+	la $t0, 0xBF886094 # PORTCCLR
+	sw $v0, 0($t0)
+
+	# Restore the return address
+	lw $ra, 0($sp)
+	addi $sp, $sp, 0x4
+	jr $ra
+
+# void hal_spi_deselect()
+hal_spi_deselect:
+	# Set all the CS pins high
+	la $t0, 0xBF886098 # PORTCSET
+	li $t1, 0x7
+	sw $t1, 0($t0)
 	jr $ra

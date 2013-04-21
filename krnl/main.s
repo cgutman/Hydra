@@ -17,10 +17,13 @@ main:
 	jal krnl_init
 
 userstart:
+
 	# Print a hello
 	la $a0, hi
 	li $v0, 4
 	syscall
+
+	jal drv_write_char_led
 
 	# Initialize the mutex
 	li $a0, 0x80004000
@@ -45,8 +48,9 @@ loop:
 	syscall
 
 	# Write the character to SPI
-	addi $a0, $s0, 0x0
-	jal hal_spi_write
+	#addi $a0, $s0, 0x0
+	#jal hal_spi_write
+	jal drv_write_char_led
 
 	# If this is a carriage return, add a line feed
 	la $t0, cr
