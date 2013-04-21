@@ -37,6 +37,8 @@ userstart:
 	li $v0, 21 # create thread
 	syscall
 
+	# Reset the history
+	li $s4, 0x0
 loop:
 	# Read a character in
 	la $v0, 12
@@ -48,10 +50,14 @@ loop:
 	li $v0, 11
 	syscall
 
+	# Push the character into our history buffer
+	srl $s4, $s4, 8
+	sll $t0, $s0, 8
+	or $s4, $s4, $t0
+	andi $s4, $s4, 0xFFFF
+
 	# Write the character to SPI
-	addi $a0, $s0, 0x0
-	sll $a0, $a0, 8
-	add $a0, $a0, $s0
+	addi $a0, $s4, 0x0
 	jal drv_write_char_led
 
 	# If this is a carriage return, add a line feed
