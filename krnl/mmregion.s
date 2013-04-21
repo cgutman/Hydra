@@ -26,10 +26,10 @@ allocfailed:
 
 # int krnl_mmregion_init()
 krnl_mmregion_init:
-	li $t0, 0x80000300 # Load the value of the next ptr
+	li $t0, 0x80001000 # Load the value of the next ptr
 	sw $t0, 0x20($k0) # Store the next ptr
 
-	li $t0, 0x80001000 # Load the value of the upper bound
+	li $t0, 0x80002000 # Load the value of the upper bound
 	sw $t0, 0x24($k0) # Store the upper bound
 
 	li $v0, 0x0 # Success

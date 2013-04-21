@@ -1,6 +1,4 @@
 .globl krnl_uart_init
-.globl krnl_uart_read
-.globl krnl_uart_write
 
 .data
 

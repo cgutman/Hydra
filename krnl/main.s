@@ -1,18 +1,19 @@
 .globl main
 
 .data
-
+hi:
+.asciiz "Hello XMIPS\r\n"
 
 .text
 main:
-	# Initialize the LEDs
-	jal init
-
 	# Initialize the kernel
 	la $a0, userstart
 	jal krnl_init
 
 userstart:
+	la $a0, hi
+	li $v0, 4
+	syscall
 
 	# Initialize the mutex
 	li $a0, 0x80004000
@@ -48,18 +49,7 @@ test1:
 		li $v0, 19 # Acquire mutex
 		syscall
 
-		# Write a char
-		li $a0, 0x40
-		li $v0, 11 # print char
-		syscall
-
-		jal red
-
-		addi $a1, $a1, 0x1
-
-		# Read the character back
-		li $v0, 12 # read char
-		syscall
+		jal hal_xmips_blink_r
 
 		addi $a0, $s0, 0x0
 		li $v0, 20
@@ -75,18 +65,7 @@ test2:
 		li $v0, 19 # Acquire mutex
 		syscall
 
-		# Write a char
-		li $a0, 0x41
-		li $v0, 11 # print char
-		syscall
-
-		jal yellow
-
-		addi $a1, $a1, 0x1
-
-		# Read the character back
-		li $v0, 12 # read char
-		syscall
+		jal hal_xmips_blink_g
 
 		addi $a0, $s0, 0x0
 		li $v0, 20
@@ -102,18 +81,7 @@ test3:
 		li $v0, 19 # Acquire mutex
 		syscall
 
-		# Write a char
-		li $a0, 0x42
-		li $v0, 11 # print char
-		syscall
-
-		jal green
-
-		addi $a1, $a1, 0x1
-
-		# Read the character back
-		li $v0, 12 # read char
-		syscall
+		jal hal_xmips_blink_b
 
 		addi $a0, $s0, 0x0
 		li $v0, 20

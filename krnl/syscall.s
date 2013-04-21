@@ -20,35 +20,35 @@ krnl_syscall_init:
 	sw $t0, 0x00($t1)
 
 	# Ordinal 1 - print_int (SPIM)
-	la $t0, krnl_syscall_null
+	la $t0, krnl_io_write_int
 	sw $t0, 0x04($t1)
 
 	# Ordinal 2 - print_float (SPIM)
-	la $t0, krnl_syscall_null
+	la $t0, krnl_io_write_float
 	sw $t0, 0x08($t1)
 
 	# Ordinal 3 - print_double (SPIM)
-	la $t0, krnl_syscall_null
+	la $t0, krnl_io_write_double
 	sw $t0, 0x0C($t1)
 
 	# Ordinal 4 - print_string (SPIM)
-	la $t0, krnl_syscall_null
+	la $t0, krnl_io_write_string
 	sw $t0, 0x10($t1)
 
 	# Ordinal 5 - read_int (SPIM)
-	la $t0, krnl_syscall_null
+	la $t0, krnl_io_read_int
 	sw $t0, 0x14($t1)
 
 	# Ordinal 6 - read_float (SPIM)
-	la $t0, krnl_syscall_null
+	la $t0, krnl_io_read_float
 	sw $t0, 0x18($t1)
 
 	# Ordinal 7 - read_double (SPIM)
-	la $t0, krnl_syscall_null
+	la $t0, krnl_io_read_double
 	sw $t0, 0x1C($t1)
 
 	# Ordinal 8 - read_string (SPIM)
-	la $t0, krnl_syscall_null
+	la $t0, krnl_io_read_string
 	sw $t0, 0x20($t1)
 
 	# Ordinal 9 - sbrk (SPIM)
@@ -60,11 +60,12 @@ krnl_syscall_init:
 	sw $t0, 0x28($t1)
 
 	# Ordinal 11 - print_character (SPIM)
-	la $t0, krnl_uart_write
+	#HACK ---- la $t0, krnl_io_write_char -----
+	la $t0, krnl_io_write_string
 	sw $t0, 0x2C($t1)
 
 	# Ordinal 12 - read_character (SPIM)
-	la $t0, krnl_uart_read
+	la $t0, krnl_io_read_char
 	sw $t0, 0x30($t1)
 
 	# Ordinal 13 - open (SPIM)

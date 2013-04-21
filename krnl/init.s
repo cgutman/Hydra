@@ -42,8 +42,8 @@ krnl_init:
 	jal krnl_exception_init
 	bne $v0, $zero, initfailed
 
-	# Setup the UART
-	jal krnl_uart_init
+	# Setup hardware I/O
+	jal hal_init_hardware
 
 	# Initialize the mutex contention lock
 	addi $a0, $k0, 0x38

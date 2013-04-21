@@ -17,7 +17,7 @@
 
 # int krnl_mm_init(void)
 krnl_mm_init:
-	li $t0, 0x80001000 # Load the value of the next ptr
+	li $t0, 0x80002000 # Load the value of the next ptr
 	sw $t0, 0x30($k0) # Store the next ptr
 
 	li $t0, 0x80008000 # Load the upper bound
