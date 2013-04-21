@@ -179,6 +179,15 @@ hal_init_hardware:
 	li $t1, 0xFFFF
 	sw $t1, 0($t0)
 
+	# ------- ADC SETUP ------
+	li $t0, 0xBF809008 # AD1CON1
+	li $t1, 0x000084E6
+	sw $t1, 0($t0)
+
+	li $t0, 0xBF809048 # AD1CHS
+	li $t1, 0x0E0E0000
+	sw $t1, 0($t0)
+
 	# ------ SPI SETUP -------
 	li $t0, 0xBF886084 # TRISCCLR
 	li $t1, 0x7
