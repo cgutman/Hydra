@@ -4,6 +4,8 @@
 .globl hal_clear_timer_interrupt
 .globl hal_enter_low_power_mode
 .globl hal_exit_low_power_mode
+.globl hal_reconfigure_timer
+.globl hal_get_ticks_per_100us
 
 # void hal_enter_low_power_mode()
 hal_enter_low_power_mode:
@@ -31,9 +33,21 @@ hal_exit_low_power_mode:
 	# Return
 	jr $ra
 
+# int hal_get_ticks_per_100us
+hal_get_ticks_per_100us:
+	li $v0, 8000
+	jr $ra
+
 # int hal_get_timer_irq()
 hal_get_timer_irq:
 	li $v0, 0x02
+	jr $ra
+
+# void hal_reconfigure_timer(int period)
+hal_reconfigure_timer:
+	li $t0, 0xBF800820 # PR2
+	sw $a0, 0($t0)
+
 	jr $ra
 
 # void hal_enable_timer(int period)

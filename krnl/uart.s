@@ -34,7 +34,7 @@ krnl_uart_init:
 
 	# Set the baud rate to 9600
 	li $t0, 0xBF806048
-	li $t1, 259 # Assuming 40 MHz peripheral clock
+	li $t1, 51 # Assuming 80 MHz peripheral clock
 	sw $t1, 0($t0)
 
 	# Set the status register
@@ -54,7 +54,7 @@ krnl_uart_init:
 
 	# Set the mode register
 	li $t0, 0xBF806008 # U1MODESET
-	li $t1, 0x8040 # 8 N 1, enable UART, enable loopback
+	li $t1, 0x8008 # 8 N 1, enable UART
 	sw $t1, 0($t0)
 
 	jr $ra

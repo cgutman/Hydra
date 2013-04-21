@@ -14,6 +14,17 @@ main:
 
 userstart:
 
+	li $s0, 0x55
+
+addr:
+	# Write a char
+	addi $a0, $s0, 0x0
+	li $v0, 11 # print char
+	syscall
+
+	#addi $s0, $s0, 0x1
+	j addr
+
 	# Initialize the mutex
 	li $a0, 0x80004000
 	li $v0, 22 # mutex init

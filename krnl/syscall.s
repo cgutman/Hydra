@@ -13,7 +13,7 @@ krnl_syscall_null:
 
 krnl_syscall_init:
 	# Build the syscall table
-	addi $t1, $k0, 0x40
+	addi $t1, $k0, 0x60
 
 	# Ordinal 0 - Nop
 	la $t0, krnl_syscall_null
@@ -133,7 +133,7 @@ krnl_syscall_dispatch:
 	# Convert the ordinal to a pointer
 	sll $t0, $v0, 2 # Shift by 2 to get a pointer offset
 	add $t0, $k0, $t0 # Add the offset of the kernel context
-	lw $t0, 0x40($t0) # Load the address of the function
+	lw $t0, 0x60($t0) # Load the address of the function
 
 	# Save temporary variables (except t0 to t2) and return address
 	addi $sp, $sp, -0x24

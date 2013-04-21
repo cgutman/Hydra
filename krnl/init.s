@@ -21,7 +21,10 @@
 # 0x34 - Memory manager upper bound
 # 0x38 - Mutex contention lock
 # 0x3C - Syscall ordinal limit
-# 0x40 - Syscall table
+# 0x40 - Timer spinlock
+# 0x44 - Next timer expiration period
+# 0x48 - Timer list head
+# 0x60 - Syscall table
 # 
 # HACK: UM hack in krnl_init and krnl_create_thread
 #
