@@ -33,9 +33,14 @@ readloop:
 	# Check if it's a null
 	beq $v0, $zero, readdone
 
+	# Write this character out
+	addi $a0, $s0, 0x0
+	addi $a1, $v0, 0x0
+	jal hal_uart_write
+
 	# Check if it's a CR
 	li $t0, 0xD
-	beq $v0, $t0, readdone
+	beq $v0, $t0, crprint
 
 	# Write the character to the buffer
 	sb $v0, 0($s1)
@@ -44,6 +49,12 @@ readloop:
 	addi $s1, $s1, 0x01
 	addi $s2, $s2, -0x01
 	j readloop
+
+crprint:
+	# Write a line feed
+	addi $a0, $s0, 0x0
+	li $a1, 0xA # LF
+	jal hal_uart_write
 
 readdone:
 	# Add a NUL terminator

@@ -56,7 +56,7 @@ krnl_syscall_init:
 	sw $t0, 0x24($t1)
 
 	# Ordinal 10 - exit (SPIM)
-	la $t0, krnl_syscall_null
+	la $t0, krnl_terminate_thread
 	sw $t0, 0x28($t1)
 
 	# Ordinal 11 - print_character (SPIM)
@@ -84,7 +84,7 @@ krnl_syscall_init:
 	sw $t0, 0x40($t1)
 
 	# Ordinal 17 - exit2 (SPIM)
-	la $t0, krnl_syscall_null
+	la $t0, krnl_terminate_thread
 	sw $t0, 0x44($t1)
 
 	# Ordinal 18 - yield()

@@ -45,6 +45,7 @@ file_017=.
 file_018=.
 file_019=.
 file_020=.
+file_021=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -67,6 +68,7 @@ file_017=no
 file_018=no
 file_019=no
 file_020=no
+file_021=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -89,6 +91,7 @@ file_017=no
 file_018=no
 file_019=no
 file_020=no
+file_021=no
 [FILE_INFO]
 file_000=spinlock.s
 file_001=interrupt.s
@@ -111,6 +114,7 @@ file_017=iomgr.s
 file_018=debug.s
 file_019=drv_14seg.s
 file_020=numlib.s
+file_021=andytest.s
 [SUITE_INFO]
 suite_guid={14495C23-81F8-43F3-8A44-859C583D7760}
 suite_state=

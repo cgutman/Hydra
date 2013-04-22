@@ -17,7 +17,6 @@ main:
 	jal krnl_init
 
 userstart:
-
 	# Print a hello
 	la $a0, hi
 	li $v0, 4
@@ -36,6 +35,8 @@ userstart:
 	li $a1, 0x80004000
 	li $v0, 21 # create thread
 	syscall
+
+	j main_test
 
 	# Reset the history
 	li $s4, 0x0

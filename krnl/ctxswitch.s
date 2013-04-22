@@ -3,12 +3,16 @@
 .globl krnl_scheduler_init
 .globl krnl_create_initial_user_thread
 .globl krnl_user_thread_exception
+.globl krnl_terminate_thread
 
 .set noat # $at can't be used here because we have to save it
 
 .data
 term_msg:
 .asciiz "Scheduler: Current thread killed due to unhandled exception\r\n"
+
+graceful_term_msg:
+.asciiz "Scheduler: Current thread is exiting\r\n"
 
 new_thread_msg:
 .asciiz "Scheduler: Created a new thread\r\n"
@@ -293,6 +297,41 @@ krnl_create_initial_user_thread:
 
 	# Unfreeze the thread
 	j krnl_unfreeze_thread
+
+krnl_terminate_thread:
+	la $a0, graceful_term_msg
+	jal krnl_io_write_string
+
+	lw $t1, 0x74($k1) # Load the PCR address
+	lw $t0, 0x08($t1) # Load the PCR's thread list head
+	addi $t3, $t0, 0x0 # Save this value for later
+	bne $t0, $k1, killfindthread # If this is not at the front of the list, loop to find it
+
+	# The first thread one the run queue needs to die
+	lw $t2, 0x70($k1)
+	sw $t2, 0x08($t1)
+	j threadkilled
+
+	killfindthread:
+		# Set the last thread
+		addi $t1, $t0, 0x0
+
+		# Lookup the next thread
+		lw $t0, 0x70($t0)
+
+		# Check if it's the thread we want
+		bne $t0, $k1, killfindthread
+
+	# Load this thread's next pointer
+	lw $t2, 0x70($k1)
+
+	# Store that value to the previous thread's next pointer
+	sw $t2, 0x70($t1)
+
+threadkilled:
+	# Switch contexts to allow the dispatcher to select a new thread
+	addi $k1, $t3, 0x0
+	j krnl_schedule_new_thread
 
 krnl_user_thread_exception:
 	la $a0, term_msg
