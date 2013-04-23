@@ -52,7 +52,7 @@ krnl_syscall_init:
 	sw $t0, 0x20($t1)
 
 	# Ordinal 9 - sbrk (SPIM)
-	la $t0, krnl_syscall_null
+	la $t0, krnl_user_alloc
 	sw $t0, 0x24($t1)
 
 	# Ordinal 10 - exit (SPIM)
@@ -107,8 +107,12 @@ krnl_syscall_init:
 	la $t0, krnl_mutex_init
 	sw $t0, 0x58($t1)
 
+	# Ordinal 23 - krnl_wait_for_thread()
+	la $t0, krnl_wait_for_thread
+	sw $t0, 0x5C($t1)
+
 	# Write the next ordinal as the first invalid one
-	li $t0, 23
+	li $t0, 24
 	sw $t0, 0x3C($k0)
 
 	jr $ra

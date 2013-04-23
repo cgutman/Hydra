@@ -1,6 +1,7 @@
 .globl krnl_mm_init
 .globl krnl_paged_alloc
-
+.globl krnl_npaged_alloc
+.globl krnl_user_alloc
 
 .data
 

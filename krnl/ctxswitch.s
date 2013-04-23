@@ -4,6 +4,7 @@
 .globl krnl_create_initial_user_thread
 .globl krnl_user_thread_exception
 .globl krnl_terminate_thread
+.globl krnl_wait_for_thread
 
 .set noat # $at can't be used here because we have to save it
 
@@ -131,7 +132,7 @@ nestedexcret:
 	# Trigger the scheduler
 	j krnl_freeze_thread
 
-# void krnl_create_thread(void* starting_address, void* arg0, void* arg1, void* arg2)
+# void* krnl_create_thread(void* starting_address, void* arg0, void* arg1, void* arg2)
 #
 # Arg0 to Arg3 are optional
 #
@@ -146,8 +147,7 @@ krnl_create_thread:
 	# Save the assembler temp
 	sw $at, 0x00($k1)
 
-	# Save v0 - v1
-	sw $v0, 0x04($k1)
+	# Save v1 (v0 is overwritten by the pointer to the new thread)
 	sw $v1, 0x08($k1)
 
 	# Save a0 - a3
@@ -211,6 +211,9 @@ krnl_create_thread:
 	# Allocate the thread context
 	li $a0, 0x29C
 	jal krnl_paged_alloc
+
+	# Write the new thread pointer to v0 to be returned
+	sw $v0, 0x04($k1)
 
 	# Save the old thread
 	addi $t2, $k1, 0x0
@@ -298,6 +301,66 @@ krnl_create_initial_user_thread:
 	# Unfreeze the thread
 	j krnl_unfreeze_thread
 
+# void krnl_wait_for_thread(void* thread)
+krnl_wait_for_thread:
+	# Save the return address and s0
+	addi $sp, $sp, -0x8
+	sw $ra, 0($sp)
+	sw $s0, 4($sp)
+
+	# Save the parameter
+	addi $s0, $a0, 0x0
+
+	# Acquire the dispatcher lock
+	addi $a0, $k0, 0x38
+	jal krnl_spinlock_acquire
+
+	# Check if this thread is already dead
+	lw $t0, 0x74($k1) # Get PCR from the current thread
+	lw $t0, 0x08($t0) # Get the thread head from the PCR
+waitthreadloop:
+	# Check if the list has terminated
+	beq $t0, $zero, waitthreadnotfound
+
+	# Check if we found the thread
+	beq $t0, $s0, waitthreadfound
+
+	# Try the next thread
+	lw $t0, 0x70($t0)
+	j waitthreadloop
+
+waitthreadfound:
+	# The requested thread is running, so let's wait for it to die
+	sw $s0, 0x78($k1)
+
+	# Release the dispatcher lock
+	addi $a0, $k0, 0x38
+	jal krnl_spinlock_release
+
+	# Yield the remainder of our time until the dispatcher schedules us again
+	jal krnl_yield_thread
+
+	# The thread is dead
+	j waitthreadret
+
+waitthreadnotfound:
+	# Release the dispatcher lock
+	addi $a0, $k0, 0x38
+	jal krnl_spinlock_release
+
+	# Thread must have already died, so we can return now
+	j waitthreadret
+
+waitthreadret:
+	# Pop the stack
+	lw $ra, 0($sp)
+	lw $s0, 4($sp)
+	addi $sp, $sp, 0x8
+
+	# Return
+	jr $ra
+
+# void krnl_terminate_thread()
 krnl_terminate_thread:
 	la $a0, graceful_term_msg
 	jal krnl_io_write_string
@@ -329,6 +392,30 @@ krnl_terminate_thread:
 	sw $t2, 0x70($t1)
 
 threadkilled:
+	# Check for threads that are waiting on this thread's death
+	lw $t0, 0x74($k1) # Get PCR again
+	lw $t0, 0x08($t0) # Get the thread head from the PCR
+	killthreadloop:
+		# Check if the list has terminated
+		beq $t0, $zero, killthreaddone
+
+		# Check if we found the thread
+		lw $t1, 0x78($t0)
+		beq $t1, $k1, killedthread
+
+		# Try the next thread
+		lw $t0, 0x70($t0)
+		j killthreadloop
+
+	killedthread:
+		# Remove this thread from the wait entry
+		sw $zero, 0x78($t0)
+
+		# Try the next thread
+		lw $t0, 0x70($t0)
+		j killthreadloop
+
+killthreaddone:
 	# Switch contexts to allow the dispatcher to select a new thread
 	addi $k1, $t3, 0x0
 	j krnl_schedule_new_thread
@@ -364,6 +451,30 @@ krnl_user_thread_exception:
 	sw $t2, 0x70($t1)
 
 exceptionkilled:
+	# Check for threads that are waiting on this thread's death
+	lw $t0, 0x74($k1) # Get PCR again
+	lw $t0, 0x08($t0) # Get the thread head from the PCR
+	exceptionthreadloop:
+		# Check if the list has terminated
+		beq $t0, $zero, exceptionthreaddone
+
+		# Check if we found the thread
+		lw $t1, 0x78($t0)
+		beq $t1, $k1, exceptionremthread
+
+		# Try the next thread
+		lw $t0, 0x70($t0)
+		j exceptionthreadloop
+
+	exceptionremthread:
+		# Remove this thread from the wait entry
+		sw $zero, 0x78($t0)
+
+		# Try the next thread
+		lw $t0, 0x70($t0)
+		j exceptionthreadloop
+
+exceptionthreaddone:
 	# Write the old status value back
 	ori $k0, $k0, 0x2 # EXL bit is set
 	mtc0 $k0, $12

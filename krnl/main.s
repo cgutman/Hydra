@@ -25,6 +25,8 @@ userstart:
 	# LED hello
 	jal drv_write_hello_led
 
+	jal shell_main
+
 	# Initialize the mutex
 	li $a0, 0x80004000
 	li $v0, 22 # mutex init
