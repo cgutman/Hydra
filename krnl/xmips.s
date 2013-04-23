@@ -7,7 +7,7 @@
 .globl hal_init_hardware
 .globl hal_uart_read
 .globl hal_uart_write
-.globl hal_spi_write
+.globl hal_spi_trans
 .globl hal_spi_select
 .globl hal_spi_deselect
 
@@ -190,19 +190,38 @@ hal_init_hardware:
 
 	# ------ SPI SETUP -------
 	li $t0, 0xBF886084 # TRISCCLR
-	li $t1, 0x7
+	li $t1, 0xE
 	sw $t1, 0($t0)
 
 	la $t0, 0xBF886098 # PORTCSET
-	li $t1, 0x7
+	li $t1, 0xE
 	sw $t1, 0($t0)
 
 	li $t0, 0xBF805E30 # SPI1BRG
 	li $t1, 0x50 # SPI clock is 0.5 MHz (assuming 40 MHz PBCLK)
 	sw $t1, 0($t0)
 
+	# Clear the SPIROV bit
+	li $t1, 0xBF805E14 # SPI1STATCLR
+	andi $t0, $t0, 0x40
+	sw $t0, 0($t1)
+
 	li $t0, 0xBF805E08 # SPI1CONSET
-	li $t1, 0x8120 # On, Master
+	li $t1, 0x18120 # On, Data on falling edge, Master, Enhanced buffer
+	sw $t1, 0($t0)
+
+	# Pump the SPI bus 10 times
+	li $t1, 0xFF
+	li $t0, 0xBF805E20 # SPI1BUF
+	sw $t1, 0($t0)
+	sw $t1, 0($t0)
+	sw $t1, 0($t0)
+	sw $t1, 0($t0)
+	sw $t1, 0($t0)
+	sw $t1, 0($t0)
+	sw $t1, 0($t0)
+	sw $t1, 0($t0)
+	sw $t1, 0($t0)
 	sw $t1, 0($t0)
 
 	# ------ UART SETUP ------
@@ -373,18 +392,33 @@ hal_xmips_blink_b:
 	jal cleargbit
 	jr $s7
 
-# void hal_spi_write(char)
-hal_spi_write:
+# char hal_spi_trans(char)
+hal_spi_trans:
 spiwritewait:
+	# Check for space in the FIFO
 	li $t0, 0xBF805E10 # SPI1STAT
 	lw $t0, 0($t0)
-	andi $t0, $t0, 0x8 # SPITBE bit
-	bne $t0, $zero, spiwriteready
+	andi $t0, $t0, 0x2 # SPITBF bit
+	beq $t0, $zero, spiwriteready
 	j spiwritewait
 
 spiwriteready:
+	# Write out a byte
 	li $t0, 0xBF805E20 # SPI1BUF
 	sw $a0, 0($t0)
+
+spireadwait:
+	# Check for data to read
+	li $t0, 0xBF805E10 # SPI1STAT
+	lw $t0, 0($t0)
+	li $t1, 0x1F000000
+	and $t0, $t0, $t1 # RXBUFELM
+	bne $t0, $zero, spireadready
+	j spireadwait
+
+spireadready:
+	li $t0, 0xBF805E20 # SPI1BUF
+	lw $v0, 0($t0)
 	jr $ra
 
 # void hal_spi_select(char)
@@ -395,6 +429,23 @@ hal_spi_select:
 
 	# Decode the bit
 	jal decodebit
+
+	# Clear the SPIROV bit
+	li $t1, 0xBF805E14 # SPI1STATCLR
+	andi $t0, $t0, 0x40
+	sw $t0, 0($t1)
+
+selectreadloop:
+	# Pull a byte off
+	li $t0, 0xBF805E20 # SPI1BUF
+	lw $t0, 0($t0)
+
+	# Check for more bytes
+	li $t1, 0x1F000000
+	li $t0, 0xBF805E10 # SPI1STAT
+	lw $t0, 0($t0)
+	and $t0, $t0, $t1 # RXBUFELM
+	bne $t0, $zero, selectreadloop
 
 	# Set the pin low
 	la $t0, 0xBF886094 # PORTCCLR
@@ -410,7 +461,8 @@ hal_spi_deselect:
 spideassertwait:
 	li $t0, 0xBF805E10 # SPI1STAT
 	lw $t0, 0($t0)
-	andi $t0, $t0, 0x800 # SPIBUSY
+	li $t1, 0x1F0800 # TXBUFELM | SPIBUSY
+	and $t0, $t0, $t1
 	beq $t0, $zero, spideassertready
 	j spideassertwait
 

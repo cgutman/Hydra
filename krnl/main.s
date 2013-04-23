@@ -36,8 +36,6 @@ userstart:
 	li $v0, 21 # create thread
 	syscall
 
-	j main_test
-
 	# Reset the history
 	li $s4, 0x0
 loop:

@@ -32,7 +32,7 @@ Z: .word 0b0100100000010010
 
 nummap:
 _0: .word 0b0111111000010010
-_1: .word 0b0000100000100100
+_1: .word 0b0011000000000000
 _2: .word 0b0110110110000000
 _3: .word 0b0111100110000000
 _4: .word 0b0011001110000000
@@ -135,26 +135,26 @@ drv_write_char_led:
 	# Write the first octet from the second character
 	srl $a0, $s3, 8
 	ori $a0, $a0, 0x80
-	jal hal_spi_write
+	jal hal_spi_trans
 
 	# Write the second octet from the second character
 	andi $a0, $s3, 0xFF
 	srl $t0, $s2, 14
 	or $a0, $a0, $t0
-	jal hal_spi_write
+	jal hal_spi_trans
 
 	# Write the remainder of the first octet from the first character
 	srl $a0, $s2, 6
 	andi $a0, $a0, 0xFF
-	jal hal_spi_write
+	jal hal_spi_trans
 
 	# Write the remainder of the second octet from the first character
 	sll $a0, $s2, 2
 	andi $a0, $a0, 0xFF
-	jal hal_spi_write
+	jal hal_spi_trans
 
 	li $a0, 0x00
-	jal hal_spi_write
+	jal hal_spi_trans
 
 	# Deselect the device
 	jal hal_spi_deselect
@@ -191,21 +191,21 @@ drv_write_hello_led:
 
 	# Output the characters
 	li $a0, 0b11001000
-	jal hal_spi_write
+	jal hal_spi_trans
 
 	#li $a0, 0x01
 	li $a0, 0b00100100
-	jal hal_spi_write
+	jal hal_spi_trans
 
 	li $a0, 0b11011110
-	jal hal_spi_write
+	jal hal_spi_trans
 
 	li $a0, 0x00
-	jal hal_spi_write
+	jal hal_spi_trans
 
 	#li $a0, 0x10
 	li $a0, 0x00
-	jal hal_spi_write
+	jal hal_spi_trans
 
 	# Deselect the device
 	jal hal_spi_deselect
