@@ -2,22 +2,25 @@
 .globl sdcard_write
 .globl sdcard_init
 
-# int sdcard_write_command(char command, int args, char crc, int responselength)
+.data
+sdresponse: .byte 0:6 # 6-byte response
+
+.text
+# sdcard_write_command(char command, int args, char crc, int responselength)
 sdcard_write_command:
 	# Push the saved regs and return address
-	addi $sp, $sp, -0x18
+	addi $sp, $sp, -0x14
 	sw $ra, 0($sp)
 	sw $s0, 4($sp)
 	sw $s1, 8($sp)
 	sw $s2, 12($sp)
 	sw $s3, 16($sp)
-	sw $s4, 20($sp)
 
 	# Save the arguments
 	addi $s0, $a0, 0x0
 	addi $s1, $a1, 0x0
 	addi $s2, $a2, 0x0
-	addi $s3, $s3, 0x0
+	addi $s3, $a3, 0x0
 
 	# Set the preamble bit
 	ori $s0, $s0, 0x40
@@ -46,8 +49,25 @@ sdcard_write_command:
 	addi $a0, $s2, 0x0
 	jal hal_spi_trans
 
-	# Read a byte
-	jal hal_spi_trans
+	# Read until we get a byte with the first bit clear
+	la $s0, sdresponse
+	la $s1, 0x00
+	sdcardresponse:
+		# Read a byte
+		li $a0, 0x00
+		jal hal_spi_trans
+
+		# If the byte started with a clear bit, it's valid
+		andi $t0, $v0, 0x80
+		bne $t0, $zero, sdcardresponse
+
+		# Write to the buffer
+		sb $v0, 0($s0)
+		addi $s0, $s0, 0x1
+		addi $s1, $s1, 0x1
+
+		# Read more if requested
+		bne $s1, $s3, sdcardresponse
 
 	# Pop the saved variables and return address
 	lw $ra, 0($sp)
@@ -55,8 +75,7 @@ sdcard_write_command:
 	lw $s1, 8($sp)
 	lw $s2, 12($sp)
 	lw $s3, 16($sp)
-	lw $s4, 20($sp)
-	addi $sp, $sp, 0x18
+	addi $sp, $sp, 0x14
 
 	# Return
 	jr $ra
@@ -83,8 +102,10 @@ idlewaitloop:
 	jal sdcard_write_command
 
 	# Check if the response has the idle bit clear
-	andi $v0, $v0, 0x80
-	beq $v0, $zero, idledone
+	la $t0, sdresponse
+	lb $t0, 0($t0)
+	andi $t0, $t0, 0x01
+	beq $t0, $zero, idledone
 
 	# Try again
 	j idlewaitloop
@@ -102,10 +123,6 @@ sdcard_init:
 	# Write the RA and S0 to stack
 	addi $sp, $sp, -0x4
 	sw $ra, 0($sp)
-
-	# Wait for at least 74 SPI cycles
-	li $a0, 0x2EE0 # 12000 cycles
-	jal krnl_wait_cycles
 
 	# Disable interrupts (only safe because we're in init)
 	di

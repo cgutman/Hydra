@@ -46,7 +46,7 @@ krnl_init:
 	jal hal_init_hardware
 
 	# Setup the SD card
-	#jal sdcard_init
+	jal sdcard_init
 
 	# Initialize the mutex contention lock
 	addi $a0, $k0, 0x38
