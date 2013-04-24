@@ -54,7 +54,7 @@ sdcard_write_command:
 	la $s1, 0x00
 	sdcardresponse:
 		# Read a byte
-		li $a0, 0x00
+		li $a0, 0xFF
 		jal hal_spi_trans
 
 		# If the byte started with a clear bit, it's valid
@@ -120,7 +120,7 @@ idledone:
 
 # void sdcard_init()
 sdcard_init:
-	# Write the RA and S0 to stack
+	# Write the RA to stack
 	addi $sp, $sp, -0x4
 	sw $ra, 0($sp)
 
@@ -130,8 +130,6 @@ sdcard_init:
 	# Select the SD card (pin 3)
 	li $a0, 3
 	jal hal_spi_select
-
-loop:
 
 	# Write CMD0 to enable SPI mode
 	li $a0, 0 # CMD0
@@ -156,10 +154,112 @@ loop:
 	# Done
 	jr $ra
 	
-# char sdcard_read()
+# bool sdcard_read(int offset, char buffer[512])
 sdcard_read:
+	# Write the RA to stack
+	addi $sp, $sp, -0xC
+	sw $ra, 0($sp)
+	sw $s0, 4($sp)
+	sw $s1, 8($sp)
+
+	# Save the buffer pointer
+	addi $s0, $a1, 0x0
+	addi $s1, $a0, 0x0
+
+	# Disable interrupts (only safe because we're in init)
+	di
+
+	# Select the SD card (pin 3)
+	li $a0, 3
+	jal hal_spi_select
+
+	# Write CMD17
+	li $a0, 17 # CMD17
+	addi $a1, $s1, 0x0 # Offset
+	li $a2, 0 # No CRC required
+	li $a3, 0x01 # Response is 1 byte
+	jal sdcard_write_command
+
+	# Check if we received an error
+	la $t0, sdresponse
+	lb $t0, 0($t0)
+	bne $t0, $zero, sdreaderror
+
+	# Wait for the data token
+	sdreadwait:
+		# Push 0xFF and read
+		li $a0, 0xFF
+		jal hal_spi_trans
+
+		# Check if we read an error token
+		li $t0, 0xE0
+		beq $v0, $t0, sdreaderror
+
+		# Check if it's the magic value we want
+		li $t0, 0xFE
+		bne $v0, $t0, sdreadwait
+
+	# Got the token, let's read the data
+	li $s1, 0x0
+	sdreaddata:
+		# Check if we need to read more
+		li $t0, 0x200
+		beq $s1, $t0, readdatadone
+
+		# Push 0xFF and read
+		li $a0, 0xFF
+		jal hal_spi_trans
+
+		# Put this in the buffer
+		sb $v0, 0($s0)
+		addi $s0, $s0, 0x01
+
+		# Next data
+		addi $s1, $s1, 0x01
+		j sdreaddata
+
+	# Read off the CRC16
+	li $a0, 0xFF
+	jal hal_spi_trans
+	li $a0, 0xFF
+	jal hal_spi_trans
+
+readdatadone:
+	# Deselect the SD card
+	jal hal_spi_deselect
+
+	# Enable interrupts
+	ei
+
+	# Pop the stack
+	lw $ra, 0($sp)
+	lw $s0, 4($sp)
+	lw $s1, 8($sp)
+	addi $sp, $sp, 0xC
+
+	# Return
+	li $v0, 1
 	jr $ra
 
-# void sdcard_write(char)
+sdreaderror:
+	# Deselect the SD card
+	jal hal_spi_deselect
+
+	# Enable interrupts
+	ei
+
+	# Pop the stack
+	lw $ra, 0($sp)
+	lw $s0, 4($sp)
+	lw $s1, 8($sp)
+	addi $sp, $sp, 0xC
+
+	# Return
+	li $v0, 0
+	jr $ra
+
+# bool sdcard_write(char)
 sdcard_write:
+	# Unimplemented
+	li $v0, 0x00
 	jr $ra

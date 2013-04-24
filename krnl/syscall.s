@@ -111,8 +111,12 @@ krnl_syscall_init:
 	la $t0, krnl_wait_for_thread
 	sw $t0, 0x5C($t1)
 
+	# Ordinal 24 - drv_write_char_led()
+	la $t0, drv_write_char_led
+	sw $t0, 0x60($t1)
+
 	# Write the next ordinal as the first invalid one
-	li $t0, 24
+	li $t0, 25
 	sw $t0, 0x3C($k0)
 
 	jr $ra
