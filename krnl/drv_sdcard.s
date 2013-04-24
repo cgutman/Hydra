@@ -25,6 +25,10 @@ sdcard_write_command:
 	# Set the preamble bit
 	ori $s0, $s0, 0x40
 
+	# Pulse the SPI bus once
+	li $a0, 1
+	jal hal_spi_pulse
+
 	# Write the command
 	addi $a0, $s0, 0x0
 	jal hal_spi_trans
@@ -68,6 +72,10 @@ sdcard_write_command:
 
 		# Read more if requested
 		bne $s1, $s3, sdcardresponse
+
+	# Pulse the SPI bus once
+	li $a0, 1
+	jal hal_spi_pulse
 
 	# Pop the saved variables and return address
 	lw $ra, 0($sp)
@@ -127,6 +135,10 @@ sdcard_init:
 	# Disable interrupts (only safe because we're in init)
 	di
 
+	# Pulse the SPI bus 10 times
+	li $a0, 10
+	jal hal_spi_pulse
+
 	# Select the SD card (pin 3)
 	li $a0, 3
 	jal hal_spi_select
@@ -169,6 +181,10 @@ sdcard_read:
 	# Disable interrupts (only safe because we're in init)
 	di
 
+	# Pulse the SPI bus 10 times
+	li $a0, 10
+	jal hal_spi_pulse
+
 	# Select the SD card (pin 3)
 	li $a0, 3
 	jal hal_spi_select
@@ -182,7 +198,7 @@ sdcard_read:
 
 	# Check if we received an error
 	la $t0, sdresponse
-	lb $t0, 0($t0)
+	lbu $t0, 0($t0)
 	bne $t0, $zero, sdreaderror
 
 	# Wait for the data token
@@ -190,10 +206,6 @@ sdcard_read:
 		# Push 0xFF and read
 		li $a0, 0xFF
 		jal hal_spi_trans
-
-		# Check if we read an error token
-		li $t0, 0xE0
-		beq $v0, $t0, sdreaderror
 
 		# Check if it's the magic value we want
 		li $t0, 0xFE

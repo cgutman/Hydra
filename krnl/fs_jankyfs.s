@@ -3,8 +3,6 @@
 .globl fs_open_file
 
 .data
-fs_mounted_msg: .asciiz "JankyFS volume mounted\r\n"
-
 sector_buffer: .byte 0:512
 
 .text
@@ -93,7 +91,7 @@ opengood:
 	# Load the position of this file on disk and return it
 	la $v0, sector_buffer
 	add $v0, $v0, $s2
-	addi $v0, $v0, 0x18
+	addi $v0, $v0, 0x14
 	lw $v0, 0($v0)
 	j openret
 
@@ -135,12 +133,14 @@ get_loc_tuple_from_offset_pos:
 # int fs_read_file(int diskoffset, int pos, char* buf, int len)
 fs_read_file:
 	# Push state onto stack
-	addi $sp, $sp, -0x14
+	addi $sp, $sp, -0x1C
 	sw $ra, 0($sp)
 	sw $s0, 4($sp)
 	sw $s1, 8($sp)
 	sw $s2, 12($sp)
 	sw $s3, 16($sp)
+	sw $s4, 20($sp)
+	sw $s5, 24($sp)
 
 	# Save the buffer and len
 	addi $s0, $a2, 0x0
@@ -153,7 +153,12 @@ fs_read_file:
 	addi $s2, $v0, 0x0
 	addi $s3, $v1, 0x0
 
+	# Track the number of bytes read
+	li $s4, 0x0
 readloop:
+	# Check if there's anything left to read
+	beq $s1, $zero, readdone
+
 	# Read a sector
 	addi $a0, $s2, 0x0
 	la $a1, sector_buffer
@@ -164,18 +169,37 @@ readloop:
 
 	# Determine how much data we can copy
 	li $t1, 0x200
-	sub $t0, $t1, $s3
-	ble $t0, $s1, readcopy
+	sub $s5, $t1, $s3
+	ble $s5, $s1, readcopy
 
 	# We don't have enough room for it all
-	addi $t0, $s1, 0x0
+	addi $s5, $s1, 0x0
 
 readcopy:
 	# Copy data from the offset into the buffer
-	add $
+	addi $a0, $s0, 0x0
+	la $a1, sector_buffer
+	add $a1, $a1, $s3
+	addi $a2, $s5, 0x0
+	jal memcpy
 
+	# Update read state
+	add $s0, $s0, $s5 # Increment buf
+	sub $s1, $s1, $s5 # Decrement len
+	addi $s2, $s2, 0x200 # Next sector
+	li $s3, 0x0 # No more sector offset
+	add $s4, $s4, $s5 # Increment bytes read
+
+	# Next read
+	j readloop
+
+readdone:
+	# Copy the bytes read into the return var
+	addi $v0, $s4, 0x0
+	j readret
 
 readfailed:
+	# Read failed
 	li $v0, -1
 	j readret
 
@@ -186,7 +210,9 @@ readret:
 	lw $s1, 8($sp)
 	lw $s2, 12($sp)
 	lw $s3, 16($sp)
-	addi $sp, $sp, 0x14
+	lw $s4, 20($sp)
+	lw $s5, 24($sp)
+	addi $sp, $sp, 0x1C
 
 	# Return
 	jr $ra

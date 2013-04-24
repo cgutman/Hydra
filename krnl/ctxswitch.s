@@ -214,6 +214,12 @@ krnl_create_thread:
 	li $a0, 0x2C0
 	jal krnl_paged_alloc
 
+	# Zero the thread context
+	addi $a0, $v0, 0x0
+	li $a1, 0x00
+	li $a2, 0x2C0
+	jal memset
+
 	# Write the new thread pointer to v0 to be returned
 	sw $v0, 0x04($k1)
 
@@ -266,6 +272,12 @@ krnl_create_initial_user_thread:
 	# Allocate the thread context
 	li $a0, 0x2C0
 	jal krnl_paged_alloc
+
+	# Zero the thread context
+	addi $a0, $v0, 0x0
+	li $a1, 0x00
+	li $a2, 0x2C0
+	jal memset
 
 	# Save the old thread
 	addi $t2, $k1, 0x0

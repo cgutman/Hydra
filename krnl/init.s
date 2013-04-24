@@ -1,7 +1,5 @@
 .globl krnl_init
 
-.data
-
 .text
 
 #

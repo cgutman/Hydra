@@ -10,6 +10,7 @@
 .globl hal_spi_trans
 .globl hal_spi_select
 .globl hal_spi_deselect
+.globl hal_spi_pulse
 
 .globl hal_xmips_blink_r
 .globl hal_xmips_blink_g
@@ -207,7 +208,7 @@ hal_init_hardware:
 	sw $t0, 0($t1)
 
 	li $t0, 0xBF805E08 # SPI1CONSET
-	li $t1, 0x18120 # On, Data on falling edge, Master, Enhanced buffer
+	li $t1, 0x18320 # On, Data on falling edge, Master, Enhanced buffer, Sample end
 	sw $t1, 0($t0)
 
 	# Pump the SPI bus 10 times
@@ -430,6 +431,16 @@ hal_spi_select:
 	# Decode the bit
 	jal decodebit
 
+	# Wait for SPI transactions to complete
+spiassertwait:
+	li $t0, 0xBF805E10 # SPI1STAT
+	lw $t0, 0($t0)
+	li $t1, 0x1F0800 # TXBUFELM | SPIBUSY
+	and $t0, $t0, $t1
+	beq $t0, $zero, spiassertready
+	j spiassertwait
+
+spiassertready:
 	# Clear the SPIROV bit
 	li $t1, 0xBF805E14 # SPI1STATCLR
 	andi $t0, $t0, 0x40
@@ -471,4 +482,35 @@ spideassertready:
 	la $t0, 0xBF886098 # PORTCSET
 	li $t1, 0x7
 	sw $t1, 0($t0)
+	jr $ra
+
+# void hal_spi_pulse(int pulses)
+hal_spi_pulse:
+	# Push vars onto the stack
+	addi $sp, $sp, -0x8
+	sw $ra, 0($sp)
+	sw $s0, 4($sp)
+
+	# Save arg
+	addi $s0, $a0, 0x0
+
+spipulseloop:
+	# Check if we have more to send
+	beq $s0, $zero, spipulsedone
+
+	# Pump the SPI
+	li $a0, 0xFF
+	jal hal_spi_trans
+
+	# Next pulse
+	addi $s0, $s0, -1
+	j spipulseloop
+
+spipulsedone:
+	# Pop vars from stack
+	lw $ra, 0($sp)
+	lw $s0, 4($sp)
+	addi $sp, $sp, 0x8
+
+	# Return
 	jr $ra

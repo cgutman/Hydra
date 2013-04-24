@@ -10,6 +10,10 @@ cr:
 lf:
 .ascii "\n"
 
+name: .asciiz "test.txt\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+
+buf: .byte 0:16
+
 .text
 main:
 	# Initialize the kernel
@@ -23,9 +27,17 @@ userstart:
 	syscall
 
 	# LED hello
-	jal drv_write_hello_led
+	#jal drv_write_hello_led
 
-	jal shell_main
+	la $a0, name
+	jal krnl_open_file
+
+	addi $a0, $v0, 0x0
+	la $a1, buf
+	li $a2, 16
+	jal krnl_read_file
+
+	#jal shell_main
 
 	# Initialize the mutex
 	li $a0, 0x80004000

@@ -1,5 +1,6 @@
 .globl memcmp
 .globl memset
+.globl memcpy
 
 # int memcmp(char* buf1, char* buf2, int len)
 memcmp:
