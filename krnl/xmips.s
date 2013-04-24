@@ -170,6 +170,10 @@ waitend:
 
 # void hal_init_hardware()
 hal_init_hardware:
+	# Push vars onto the stack
+	addi $sp, $sp, -0x4
+	sw $ra, 0($sp)
+
 	# Set bits 12, 13, and 14 on TRISG to output (RGB LED)
 	li $t0, 0xBF886184
 	li $t1, 0x7000
@@ -194,36 +198,22 @@ hal_init_hardware:
 	li $t1, 0xE
 	sw $t1, 0($t0)
 
-	la $t0, 0xBF886098 # PORTCSET
-	li $t1, 0xE
-	sw $t1, 0($t0)
+	# Set all the CS pins high
+	jal hal_spi_deselect
 
+	# Set SPI clock divider
 	li $t0, 0xBF805E30 # SPI1BRG
 	li $t1, 0x50 # SPI clock is 0.5 MHz (assuming 40 MHz PBCLK)
 	sw $t1, 0($t0)
 
-	# Clear the SPIROV bit
-	li $t1, 0xBF805E14 # SPI1STATCLR
-	andi $t0, $t0, 0x40
-	sw $t0, 0($t1)
-
+	# Set SPI control register
 	li $t0, 0xBF805E08 # SPI1CONSET
 	li $t1, 0x18320 # On, Data on falling edge, Master, Enhanced buffer, Sample end
 	sw $t1, 0($t0)
 
-	# Pump the SPI bus 10 times
-	li $t1, 0xFF
-	li $t0, 0xBF805E20 # SPI1BUF
-	sw $t1, 0($t0)
-	sw $t1, 0($t0)
-	sw $t1, 0($t0)
-	sw $t1, 0($t0)
-	sw $t1, 0($t0)
-	sw $t1, 0($t0)
-	sw $t1, 0($t0)
-	sw $t1, 0($t0)
-	sw $t1, 0($t0)
-	sw $t1, 0($t0)
+	# Pulse the SPI bus 10 times
+	li $a0, 10
+	jal hal_spi_pulse
 
 	# ------ UART SETUP ------
 	la $t0, hal_max_uart
@@ -293,10 +283,17 @@ uart_setup_loop:
 	j uart_setup_loop
 
 uart_setup_done:
-	# Write the hello and return
+	# Write the hello
 	li $a0, 2
 	la $a1, hal_hello
-	j krnl_serial_write_string
+	jal krnl_serial_write_string
+
+	# Pop vars from the stack
+	lw $ra, 0($sp)
+	addi $sp, $sp, 0x4
+
+	# Return
+	jr $ra
 
 
 # void krnl_uart_write(port, char)
@@ -480,7 +477,7 @@ spideassertwait:
 spideassertready:
 	# Set all the CS pins high
 	la $t0, 0xBF886098 # PORTCSET
-	li $t1, 0x7
+	li $t1, 0xE
 	sw $t1, 0($t0)
 	jr $ra
 

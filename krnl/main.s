@@ -27,7 +27,7 @@ userstart:
 	syscall
 
 	# LED hello
-	#jal drv_write_hello_led
+	jal drv_write_hello_led
 
 	la $a0, name
 	jal krnl_open_file
