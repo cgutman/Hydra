@@ -46,6 +46,8 @@ new_thread_msg:
 # 0x198 Unused
 # 0x19C End of user-mode stack
 # 0x29C Beginning of user-mode stack
+# 0x2A0 Start of file table
+# 0x2C0 End of file table
 #
 
 # int krnl_scheduler_init()
@@ -209,7 +211,7 @@ krnl_create_thread:
 	jal krnl_debug
 
 	# Allocate the thread context
-	li $a0, 0x29C
+	li $a0, 0x2C0
 	jal krnl_paged_alloc
 
 	# Write the new thread pointer to v0 to be returned
@@ -262,7 +264,7 @@ krnl_create_initial_user_thread:
 	addi $s0, $a0, 0x0
 
 	# Allocate the thread context
-	li $a0, 0x29C
+	li $a0, 0x2C0
 	jal krnl_paged_alloc
 
 	# Save the old thread

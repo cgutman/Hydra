@@ -68,19 +68,19 @@ krnl_syscall_init:
 	sw $t0, 0x30($t1)
 
 	# Ordinal 13 - open (SPIM)
-	la $t0, krnl_syscall_null
+	la $t0, krnl_open_file
 	sw $t0, 0x34($t1)
 
 	# Ordinal 14 - read (SPIM)
-	la $t0, krnl_syscall_null
+	la $t0, krnl_read_file
 	sw $t0, 0x38($t1)
 
 	# Ordinal 15 - write (SPIM)
-	la $t0, krnl_syscall_null
+	la $t0, krnl_write_file
 	sw $t0, 0x3C($t1)
 
 	# Ordinal 16 - close (SPIM)
-	la $t0, krnl_syscall_null
+	la $t0, krnl_close_file
 	sw $t0, 0x40($t1)
 
 	# Ordinal 17 - exit2 (SPIM)

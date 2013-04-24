@@ -56,6 +56,9 @@ file_028=.
 file_029=.
 file_030=.
 file_031=.
+file_032=.
+file_033=.
+file_034=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -89,6 +92,9 @@ file_028=no
 file_029=no
 file_030=no
 file_031=no
+file_032=no
+file_033=no
+file_034=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -122,6 +128,9 @@ file_028=no
 file_029=no
 file_030=no
 file_031=no
+file_032=no
+file_033=no
+file_034=no
 [FILE_INFO]
 file_000=spinlock.s
 file_001=interrupt.s
@@ -152,9 +161,12 @@ file_025=C:\Users\Cameron\Documents\hermes\shell_init.c
 file_026=C:\Users\Cameron\Documents\hermes\interpreter.c
 file_027=C:\Users\Cameron\Documents\hermes\blink.c
 file_028=C:\Users\Cameron\Documents\hermes\trampoline.c
-file_029=C:\Users\Cameron\Documents\hermes\trampoline.h
-file_030=C:\Users\Cameron\Documents\hermes\stdlib.h
-file_031=C:\Users\Cameron\Documents\hermes\blink.h
+file_029=fs_jankyfs.s
+file_030=file.s
+file_031=utils.s
+file_032=C:\Users\Cameron\Documents\hermes\trampoline.h
+file_033=C:\Users\Cameron\Documents\hermes\stdlib.h
+file_034=C:\Users\Cameron\Documents\hermes\blink.h
 [SUITE_INFO]
 suite_guid={14495C23-81F8-43F3-8A44-859C583D7760}
 suite_state=
