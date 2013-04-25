@@ -119,8 +119,12 @@ krnl_syscall_init:
 	la $t0, sdcard_read
 	sw $t0, 0x64($t1)
 
+	# Ordinal 26 - krnl_io_switch_tty()
+	la $t0, krnl_io_switch_tty
+	sw $t0, 0x68($t1)
+
 	# Write the next ordinal as the first invalid one
-	li $t0, 26
+	li $t0, 27
 	sw $t0, 0x3C($k0)
 
 	jr $ra

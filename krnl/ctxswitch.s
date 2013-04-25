@@ -43,7 +43,7 @@ new_thread_msg:
 # 0x90 End of kernel-mode thread stack
 # 0x190 Beginning of kernel-mode thread stack
 # 0x194 Saved user-mode stack pointer
-# 0x198 Unused
+# 0x198 I/O identifier
 # 0x19C End of user-mode stack
 # 0x29C Beginning of user-mode stack
 # 0x2A0 Start of file table
@@ -224,7 +224,7 @@ krnl_create_thread:
 	sw $v0, 0x04($k1)
 
 	# Save the old thread
-	addi $t2, $k1, 0x0
+	addi $t3, $k1, 0x0
 
 	# Read the PCR address from the old thread
 	lw $t1, 0x74($k1)
@@ -239,6 +239,10 @@ krnl_create_thread:
 	lw $t2, 0x08($t1) # Load the current head in $t2
 	sw $t2, 0x70($k1) # Store the current head into the next thread entry
 	sw $k1, 0x08($t1) # Store the current thread into the PCR's thread list head
+
+	# Use the current TTY for the new thread
+	lw $t1, 0x198($t3)
+	sw $t1, 0x198($k1)
 
 	# Write arguments into the new thread
 	sw $s1, 0x0C($k1)
@@ -280,7 +284,7 @@ krnl_create_initial_user_thread:
 	jal memset
 
 	# Save the old thread
-	addi $t2, $k1, 0x0
+	addi $t3, $k1, 0x0
 
 	# Read the PCR address from the old thread
 	lw $t1, 0x74($k1)
@@ -295,6 +299,10 @@ krnl_create_initial_user_thread:
 	lw $t2, 0x08($t1) # Load the current head in $t2
 	sw $t2, 0x70($k1) # Store the current head into the next thread entry
 	sw $k1, 0x08($t1) # Store the current thread into the PCR's thread list head
+
+	# Use the current TTY for the new thread
+	lw $t1, 0x198($t3)
+	sw $t1, 0x198($k1)
 
 	# Write the starting address
 	sw $s0, 0x80($k1)

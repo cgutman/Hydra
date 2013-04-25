@@ -48,6 +48,10 @@ krnl_create_idle_thread:
 	# No exception active
 	sw $zero, 0x8C($k1)
 
+	# Default TTY
+	li $t0, 2
+	sw $t0, 0x198($k1)
+
 	# Return to init code
 	addi $ra, $s2, 0x0
 	jr $ra
