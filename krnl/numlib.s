@@ -1,6 +1,12 @@
 .globl numlib_char_to_int
+.globl numlib_digit_to_char
 .globl numlib_string_to_int
-#.globl numlib_int_to_string
+
+.text
+# char numlib_digit_to_char(int)
+numlib_digit_to_char:
+	addi $v0, $a0, 0x30 # 30h is ASCII zero character
+	jr $ra
 
 # int numlib_char_to_int(char)
 numlib_char_to_int:
