@@ -1,6 +1,24 @@
 .globl memcmp
 .globl memset
 .globl memcpy
+.globl strlen
+
+# int strlen(char* str)
+strlen:
+	li $v0, 0x0
+
+strlenloop:
+	# Check this byte
+	lbu $t0, 0($a0)
+	beq $t0, $zero, strlendone
+
+	# Next byte
+	addi $a0, $a0, 0x1
+	addi $v0, $v0, 0x1
+	j strlenloop
+
+strlendone:
+	jr $ra
 
 # int memcmp(char* buf1, char* buf2, int len)
 memcmp:

@@ -230,13 +230,13 @@ sdcard_read:
 		addi $s1, $s1, 0x01
 		j sdreaddata
 
+readdatadone:
 	# Read off the CRC16
 	li $a0, 0xFF
 	jal hal_spi_trans
 	li $a0, 0xFF
 	jal hal_spi_trans
 
-readdatadone:
 	# Deselect the SD card
 	jal hal_spi_deselect
 
