@@ -30,23 +30,23 @@ section                    address  length [bytes]      (dec)  Description
 .text                   0x9d002000          0x540        1344  App's exec code 
 .dinit                  0x9d002540          0x474        1140   
 .text                   0x9d0029b4         0x1208        4616  App's exec code 
-.text                   0x9d003bbc          0x82c        2092  App's exec code 
-.text.general_exception 0x9d0043e8           0xd0         208   
-.text                   0x9d0044b8          0x440        1088  App's exec code 
-.rodata                 0x9d0048f8           0x44          68  Read-only const 
-.text                   0x9d00493c           0x74         116  App's exec code 
-.rodata                 0x9d0049b0           0x24          36  Read-only const 
-.text                   0x9d0049d4           0x40          64  App's exec code 
-.rodata                 0x9d004a14           0x1c          28  Read-only const 
-.text                   0x9d004a30           0x2c          44  App's exec code 
-.rodata                 0x9d004a5c           0x28          40  Read-only const 
-.text                   0x9d004a84           0x10          16  App's exec code 
-.text._general_exceptio 0x9d004a94            0xc          12   
-.text._bootstrap_except 0x9d004aa0            0xc          12   
-.text                   0x9d004aac            0x8           8  App's exec code 
-.text._on_reset         0x9d004ab4            0x8           8   
-.text._on_bootstrap     0x9d004abc            0x8           8   
-      Total kseg0_program_mem used  :      0x4ab8       19128  3.6% of 0x80000
+.text                   0x9d003bbc          0x878        2168  App's exec code 
+.text.general_exception 0x9d004434           0xd0         208   
+.text                   0x9d004504          0x440        1088  App's exec code 
+.rodata                 0x9d004944           0x44          68  Read-only const 
+.text                   0x9d004988           0x74         116  App's exec code 
+.rodata                 0x9d0049fc           0x24          36  Read-only const 
+.text                   0x9d004a20           0x40          64  App's exec code 
+.rodata                 0x9d004a60           0x1c          28  Read-only const 
+.text                   0x9d004a7c           0x2c          44  App's exec code 
+.rodata                 0x9d004aa8           0x28          40  Read-only const 
+.text                   0x9d004ad0           0x10          16  App's exec code 
+.text._general_exceptio 0x9d004ae0            0xc          12   
+.text._bootstrap_except 0x9d004aec            0xc          12   
+.text                   0x9d004af8            0x8           8  App's exec code 
+.text._on_reset         0x9d004b00            0x8           8   
+.text._on_bootstrap     0x9d004b08            0x8           8   
+      Total kseg0_program_mem used  :      0x4b04       19204  3.7% of 0x80000
 
 kseg0 Boot-Memory Usage
 section                    address  length [bytes]      (dec)  Description
@@ -66,7 +66,7 @@ section                    address  length [bytes]      (dec)  Description
 .bev_excpt              0xbfc00380           0x10          16  BEV-Exception 
          Total kseg1_boot_mem used  :       0x204         516  44.2% of 0x490
         --------------------------------------------------------------------------
-         Total Program Memory used  :      0x4ccc       19660  3.7% of 0x81e00
+         Total Program Memory used  :      0x4d18       19736  3.7% of 0x81e00
         --------------------------------------------------------------------------
 
 
@@ -882,7 +882,7 @@ LOAD c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5
  .debug_abbrev  0x00000769       0x25 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-reset.o)
  .debug_abbrev  0x0000078e       0x25 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-bootstrap.o)
 
-.debug_line     0x00000000     0x13a7
+.debug_line     0x00000000     0x13b7
  *(.debug_line)
  .debug_line    0x00000000       0x44 spinlock.o
  .debug_line    0x00000044       0x68 interrupt.o
@@ -899,29 +899,29 @@ LOAD c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5
  .debug_line    0x000005cb       0x9d syscall.o
  .debug_line    0x00000668       0x4c idle.o
  .debug_line    0x000006b4      0x13d xmips.o
- .debug_line    0x000007f1       0x6d serial.o
- .debug_line    0x0000085e       0x56 iomgr.o
- .debug_line    0x000008b4       0x38 debug.o
- .debug_line    0x000008ec       0x9b drv_14seg.o
- .debug_line    0x00000987       0x4d numlib.o
- .debug_line    0x000009d4       0x83 andytest.o
- .debug_line    0x00000a57       0xc7 drv_sdcard.o
- .debug_line    0x00000b1e       0x38 wait.o
- .debug_line    0x00000b56       0x8e stdlib.o
- .debug_line    0x00000be4       0x63 shell_init.o
- .debug_line    0x00000c47       0x8b interpreter.o
- .debug_line    0x00000cd2       0x8f blink.o
- .debug_line    0x00000d61       0xe6 trampoline.o
- .debug_line    0x00000e47       0xc0 fs_jankyfs.o
- .debug_line    0x00000f07       0x95 file.o
- .debug_line    0x00000f9c       0x55 utils.o
- .debug_line    0x00000ff1       0x68 say.o
- .debug_line    0x00001059       0x70 ls.o
- .debug_line    0x000010c9       0x6a cat.o
- .debug_line    0x00001133       0xa4 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-general-exception-handler.o)
- .debug_line    0x000011d7       0xa6 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-bootstrap-exception-handler.o)
- .debug_line    0x0000127d       0x93 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-reset.o)
- .debug_line    0x00001310       0x97 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-bootstrap.o)
+ .debug_line    0x000007f1       0x7d serial.o
+ .debug_line    0x0000086e       0x56 iomgr.o
+ .debug_line    0x000008c4       0x38 debug.o
+ .debug_line    0x000008fc       0x9b drv_14seg.o
+ .debug_line    0x00000997       0x4d numlib.o
+ .debug_line    0x000009e4       0x83 andytest.o
+ .debug_line    0x00000a67       0xc7 drv_sdcard.o
+ .debug_line    0x00000b2e       0x38 wait.o
+ .debug_line    0x00000b66       0x8e stdlib.o
+ .debug_line    0x00000bf4       0x63 shell_init.o
+ .debug_line    0x00000c57       0x8b interpreter.o
+ .debug_line    0x00000ce2       0x8f blink.o
+ .debug_line    0x00000d71       0xe6 trampoline.o
+ .debug_line    0x00000e57       0xc0 fs_jankyfs.o
+ .debug_line    0x00000f17       0x95 file.o
+ .debug_line    0x00000fac       0x55 utils.o
+ .debug_line    0x00001001       0x68 say.o
+ .debug_line    0x00001069       0x70 ls.o
+ .debug_line    0x000010d9       0x6a cat.o
+ .debug_line    0x00001143       0xa4 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-general-exception-handler.o)
+ .debug_line    0x000011e7       0xa6 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-bootstrap-exception-handler.o)
+ .debug_line    0x0000128d       0x93 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-reset.o)
+ .debug_line    0x00001320       0x97 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-bootstrap.o)
 
 .debug_frame    0x00000000      0x55c
  *(.debug_frame)
@@ -1424,146 +1424,146 @@ LOAD data_init
                 0x9d000f34                krnl_write_file
                 0x9d000f98                krnl_read_file
 
-.text           0x9d003bbc      0x82c
+.text           0x9d003bbc      0x878
  .text          0x9d003bbc      0x17c andytest.o
                 0x9d003bbc                main_test
  .text          0x9d003d38      0x160 ls.o
                 0x9d003d38                read_index
                 0x9d003dc8                ls_main
- .text          0x9d003e98      0x130 mutex.o
-                0x9d003e98                krnl_mutex_acquire
-                0x9d003f30                krnl_mutex_release
-                0x9d003fa0                krnl_mutex_init
-                0x9d003fac                krnl_mutex_is_locked
- .text          0x9d003fc8      0x12c cat.o
-                0x9d003fc8                cat_main
- .text          0x9d0040f4      0x104 serial.o
-                0x9d0040f4                krnl_serial_read_char
-                0x9d0040fc                krnl_serial_read_string
-                0x9d004184                krnl_serial_write_char
-                0x9d00418c                krnl_serial_write_string
- .text          0x9d0041f8       0xfc simplemm.o
-                0x9d0041f8                krnl_mm_init
-                0x9d004228                krnl_paged_alloc
-                0x9d004230                krnl_npaged_alloc
-                0x9d0042e0                krnl_user_alloc
-                0x9d0042e8                krnl_free
- .text          0x9d0042f4       0xf4 say.o
-                0x9d0042f4                say_main
+ .text          0x9d003e98      0x150 serial.o
+                0x9d003e98                krnl_serial_read_char
+                0x9d003ea0                krnl_serial_read_string
+                0x9d003f74                krnl_serial_write_char
+                0x9d003f7c                krnl_serial_write_string
+ .text          0x9d003fe8      0x130 mutex.o
+                0x9d003fe8                krnl_mutex_acquire
+                0x9d004080                krnl_mutex_release
+                0x9d0040f0                krnl_mutex_init
+                0x9d0040fc                krnl_mutex_is_locked
+ .text          0x9d004118      0x12c cat.o
+                0x9d004118                cat_main
+ .text          0x9d004244       0xfc simplemm.o
+                0x9d004244                krnl_mm_init
+                0x9d004274                krnl_paged_alloc
+                0x9d00427c                krnl_npaged_alloc
+                0x9d00432c                krnl_user_alloc
+                0x9d004334                krnl_free
+ .text          0x9d004340       0xf4 say.o
+                0x9d004340                say_main
 
 .text.general_exception
-                0x9d0043e8       0xd0
+                0x9d004434       0xd0
  .text.general_exception
-                0x9d0043e8       0xd0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(general-exception.o)
-                0x9d0043e8                _general_exception_context
+                0x9d004434       0xd0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(general-exception.o)
+                0x9d004434                _general_exception_context
 
-.text           0x9d0044b8      0x440
- .text          0x9d0044b8       0xc4 interrupt.o
-                0x9d0044b8                krnl_request_softint
-                0x9d0044dc                krnl_register_interrupt
-                0x9d004510                krnl_unregister_interrupt
-                0x9d004534                krnl_disable_interrupts
-                0x9d004548                krnl_restore_interrupts
-                0x9d004560                krnl_interrupt_dispatch
- .text          0x9d00457c       0xbc init.o
-                0x9d00457c                krnl_init
- .text          0x9d004638       0xa8 utils.o
-                0x9d004638                strlen
-                0x9d00465c                memcmp
-                0x9d004698                memset
-                0x9d0046b8                memcpy
- .text          0x9d0046e0       0x94 iomgr.o
-                0x9d0046e0                krnl_io_switch_tty
-                0x9d0046e8                krnl_io_write_int
-                0x9d0046f0                krnl_io_write_float
-                0x9d0046f8                krnl_io_write_double
-                0x9d004700                krnl_io_write_string
-                0x9d00470c                krnl_io_write_char
-                0x9d004718                krnl_io_read_int
-                0x9d00474c                krnl_io_read_float
-                0x9d004754                krnl_io_read_double
-                0x9d00475c                krnl_io_read_string
-                0x9d00476c                krnl_io_read_char
- .text          0x9d004774       0x70 idle.o
-                0x9d004774                krnl_create_idle_thread
-                0x9d0047d4                krnl_idle
- .text          0x9d0047e4       0x68 numlib.o
-                0x9d0047e4                numlib_digit_to_char
-                0x9d0047ec                numlib_char_to_int
-                0x9d0047f4                numlib_string_to_int
- .text          0x9d00484c       0x64 shell_init.o
-                0x9d00484c                shell_main
- .text          0x9d0048b0       0x48 mmregion.o
-                0x9d0048b0                krnl_mmregion_alloc
-                0x9d0048d8                krnl_mmregion_init
+.text           0x9d004504      0x440
+ .text          0x9d004504       0xc4 interrupt.o
+                0x9d004504                krnl_request_softint
+                0x9d004528                krnl_register_interrupt
+                0x9d00455c                krnl_unregister_interrupt
+                0x9d004580                krnl_disable_interrupts
+                0x9d004594                krnl_restore_interrupts
+                0x9d0045ac                krnl_interrupt_dispatch
+ .text          0x9d0045c8       0xbc init.o
+                0x9d0045c8                krnl_init
+ .text          0x9d004684       0xa8 utils.o
+                0x9d004684                strlen
+                0x9d0046a8                memcmp
+                0x9d0046e4                memset
+                0x9d004704                memcpy
+ .text          0x9d00472c       0x94 iomgr.o
+                0x9d00472c                krnl_io_switch_tty
+                0x9d004734                krnl_io_write_int
+                0x9d00473c                krnl_io_write_float
+                0x9d004744                krnl_io_write_double
+                0x9d00474c                krnl_io_write_string
+                0x9d004758                krnl_io_write_char
+                0x9d004764                krnl_io_read_int
+                0x9d004798                krnl_io_read_float
+                0x9d0047a0                krnl_io_read_double
+                0x9d0047a8                krnl_io_read_string
+                0x9d0047b8                krnl_io_read_char
+ .text          0x9d0047c0       0x70 idle.o
+                0x9d0047c0                krnl_create_idle_thread
+                0x9d004820                krnl_idle
+ .text          0x9d004830       0x68 numlib.o
+                0x9d004830                numlib_digit_to_char
+                0x9d004838                numlib_char_to_int
+                0x9d004840                numlib_string_to_int
+ .text          0x9d004898       0x64 shell_init.o
+                0x9d004898                shell_main
+ .text          0x9d0048fc       0x48 mmregion.o
+                0x9d0048fc                krnl_mmregion_alloc
+                0x9d004924                krnl_mmregion_init
 
-.rodata         0x9d0048f8       0x44
- .rodata        0x9d0048f8       0x44 cat.o
+.rodata         0x9d004944       0x44
+ .rodata        0x9d004944       0x44 cat.o
 
-.text           0x9d00493c       0x74
- .text          0x9d00493c       0x3c pcr.o
-                0x9d00493c                krnl_pcr_alloc
- .text          0x9d004978       0x38 spinlock.o
-                0x9d004978                krnl_spinlock_acquire
-                0x9d00499c                krnl_spinlock_release
-                0x9d0049a8                krnl_spinlock_init
+.text           0x9d004988       0x74
+ .text          0x9d004988       0x3c pcr.o
+                0x9d004988                krnl_pcr_alloc
+ .text          0x9d0049c4       0x38 spinlock.o
+                0x9d0049c4                krnl_spinlock_acquire
+                0x9d0049e8                krnl_spinlock_release
+                0x9d0049f4                krnl_spinlock_init
 
-.rodata         0x9d0049b0       0x24
- .rodata        0x9d0049b0       0x24 ls.o
+.rodata         0x9d0049fc       0x24
+ .rodata        0x9d0049fc       0x24 ls.o
 
-.text           0x9d0049d4       0x40
- .text          0x9d0049d4       0x20 event.o
-                0x9d0049d4                krnl_event_init
-                0x9d0049dc                krnl_event_wait
-                0x9d0049e4                krnl_event_signal
-                0x9d0049ec                krnl_event_is_signalled
- .text          0x9d0049f4       0x20 wait.o
-                0x9d0049f4                krnl_wait_cycles
+.text           0x9d004a20       0x40
+ .text          0x9d004a20       0x20 event.o
+                0x9d004a20                krnl_event_init
+                0x9d004a28                krnl_event_wait
+                0x9d004a30                krnl_event_signal
+                0x9d004a38                krnl_event_is_signalled
+ .text          0x9d004a40       0x20 wait.o
+                0x9d004a40                krnl_wait_cycles
 
-.rodata         0x9d004a14       0x1c
- .rodata        0x9d004a14       0x1c shell_init.o
+.rodata         0x9d004a60       0x1c
+ .rodata        0x9d004a60       0x1c shell_init.o
 
-.text           0x9d004a30       0x2c
- .text          0x9d004a30       0x18 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-nmi-handler.o)
-                0x9d004a30                _nmi_handler
- .text          0x9d004a48       0x14 debug.o
-                0x9d004a48                krnl_debug
+.text           0x9d004a7c       0x2c
+ .text          0x9d004a7c       0x18 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-nmi-handler.o)
+                0x9d004a7c                _nmi_handler
+ .text          0x9d004a94       0x14 debug.o
+                0x9d004a94                krnl_debug
 
-.rodata         0x9d004a5c       0x28
- .rodata        0x9d004a5c       0x14 interpreter.o
- .rodata        0x9d004a70       0x14 blink.o
+.rodata         0x9d004aa8       0x28
+ .rodata        0x9d004aa8       0x14 interpreter.o
+ .rodata        0x9d004abc       0x14 blink.o
 
-.text           0x9d004a84       0x10
- .text          0x9d004a84       0x10 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib/crt0.o
-                0x9d004a8c                __crt0_exit
+.text           0x9d004ad0       0x10
+ .text          0x9d004ad0       0x10 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib/crt0.o
+                0x9d004ad8                __crt0_exit
 
 .text._general_exception_handler
-                0x9d004a94        0xc
+                0x9d004ae0        0xc
  .text._general_exception_handler
-                0x9d004a94        0xc c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-general-exception-handler.o)
-                0x9d004a94                _general_exception_handler
+                0x9d004ae0        0xc c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-general-exception-handler.o)
+                0x9d004ae0                _general_exception_handler
 
 .text._bootstrap_exception_handler
-                0x9d004aa0        0xc
+                0x9d004aec        0xc
  .text._bootstrap_exception_handler
-                0x9d004aa0        0xc c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-bootstrap-exception-handler.o)
-                0x9d004aa0                _bootstrap_exception_handler
+                0x9d004aec        0xc c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-bootstrap-exception-handler.o)
+                0x9d004aec                _bootstrap_exception_handler
 
-.text           0x9d004aac        0x8
- .text          0x9d004aac        0x8 fubar.o
-                0x9d004aac                krnl_fubar
+.text           0x9d004af8        0x8
+ .text          0x9d004af8        0x8 fubar.o
+                0x9d004af8                krnl_fubar
 
 .text._on_reset
-                0x9d004ab4        0x8
+                0x9d004b00        0x8
  .text._on_reset
-                0x9d004ab4        0x8 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-reset.o)
-                0x9d004ab4                _on_reset
+                0x9d004b00        0x8 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-reset.o)
+                0x9d004b00                _on_reset
 
 .text._on_bootstrap
-                0x9d004abc        0x8
+                0x9d004b08        0x8
  .text._on_bootstrap
-                0x9d004abc        0x8 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-bootstrap.o)
-                0x9d004abc                _on_bootstrap
+                0x9d004b08        0x8 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libc.a(default-on-bootstrap.o)
+                0x9d004b08                _on_bootstrap
 
 .text%z92       0x00000000        0x0
  .text          0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib/./proc/32MX795F512L\processor.o

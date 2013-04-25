@@ -11,17 +11,18 @@ krnl_serial_read_char:
 # krnl_serial_read_string(port, char*, len)
 krnl_serial_read_string:
 	# Save s0-s2 and ra
-	addi $sp, $sp, -0x10
+	addi $sp, $sp, -0x14
 	sw $ra, 0($sp)
 	sw $s0, 4($sp)
 	sw $s1, 8($sp)
 	sw $s2, 12($sp)
+	sw $s3, 16($sp)
 
 	# Save arguments
 	addi $s0, $a0, 0x0
 	addi $s1, $a1, 0x0
 	addi $s2, $a2, -0x1 # Leave 1 space open for the NUL
-
+	li $s3, 0x0
 readloop:
 	# Check if we're out of buffer space
 	beq $s2, $zero, readdone
@@ -32,6 +33,14 @@ readloop:
 
 	# Check if it's a null
 	beq $v0, $zero, readdone
+
+	# Check if it's a backspace
+	li $t0, 0x8
+	beq $v0, $t0, backspaceprint
+
+	# Check if it's a delete
+	li $t0, 0x7F
+	beq $v0, $t0, backspaceprint
 
 	# Write this character out
 	addi $a0, $s0, 0x0
@@ -47,7 +56,24 @@ readloop:
 
 	# Increment buffer pointer and decrement buffer len
 	addi $s1, $s1, 0x01
+	addi $s3, $s3, 0x01
 	addi $s2, $s2, -0x01
+	j readloop
+
+backspaceprint:
+	# If we're at the beginning, ignore this
+	beq $s3, $zero, readloop
+
+	# Write this character out
+	addi $a0, $s0, 0x0
+	addi $a1, $v0, 0x0
+	jal hal_uart_write
+
+	# Otherwise just back up by one
+	addi $s1, $s1, -0x01
+	addi $s3, $s3, -0x01
+	addi $s2, $s2, 0x01
+
 	j readloop
 
 crprint:
@@ -65,7 +91,8 @@ readdone:
 	lw $s0, 4($sp)
 	lw $s1, 8($sp)
 	lw $s2, 12($sp)
-	addi $sp, $sp, 0x10
+	lw $s3, 16($sp)
+	addi $sp, $sp, 0x14
 	jr $ra
 
 # krnl_serial_write_char(port, char)
