@@ -41,7 +41,7 @@ sdcard_write_command:
 	andi $a0, $a0, 0xFF
 	jal hal_spi_trans
 	srl $a0, $s1, 8
-	andi $a0, $s1, 0xFF
+	andi $a0, $a0, 0xFF
 	jal hal_spi_trans
 	andi $a0, $s1, 0xFF
 	jal hal_spi_trans
