@@ -73,9 +73,9 @@ section                    address  length [bytes]      (dec)  Description
 kseg1 Data-Memory Usage
 section                    address  length [bytes]      (dec)  Description
 -------                 ----------  -------------------------  -----------
-.bss                    0xa0000200           0x20          32  Uninitialized data 
-.data                   0xa0000220          0x3c5         965  Initialized data 
-.data                   0xa00005e8           0x46          70  Initialized data 
+.bss                    0xa0000000           0x20          32  Uninitialized data 
+.data                   0xa0000020          0x3c5         965  Initialized data 
+.data                   0xa00003e8           0x46          70  Initialized data 
          Total kseg1_data_mem used  :       0x42b        1067  0.8% of 0x20000
         --------------------------------------------------------------------------
             Total Data Memory used  :       0x42b        1067  0.8% of 0x20000
@@ -85,8 +85,8 @@ section                    address  length [bytes]      (dec)  Description
 Dynamic Data-Memory Reservation
 section                    address  length [bytes]      (dec)  Description
 -------                 ----------  -------------------------  -----------
-heap                    0xa0000630              0           0  Reserved for heap 
-stack                   0xa0000648        0x1f9a8      129448  Reserved for stack 
+heap                    0xa0000430              0           0  Reserved for heap 
+stack                   0xa0000448        0x1fba8      129960  Reserved for stack 
 
         --------------------------------------------------------------------------
 
@@ -199,7 +199,6 @@ configsfrs       0xbfc02ff0         0x00000010
 Linker script and memory map
 
 LOAD c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib/crt0.o
-                0x00000001                _DEBUGGER = 0x1
 LOAD spinlock.o
 LOAD interrupt.o
 LOAD ctxswitch.o
@@ -236,9 +235,6 @@ LOAD say.o
 LOAD ls.o
 LOAD cat.o
                 0x00000001                __MPLAB_BUILD = 0x1
-                0x00000001                __MPLAB_DEBUG = 0x1
-                0x00000001                __MPLAB_DEBUGGER_ICD3 = 0x1
-                0x00000001                __ICD2RAM = 0x1
 LOAD c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1\libgcc.a
 START GROUP
 LOAD c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib\libdebug.a
@@ -288,13 +284,11 @@ LOAD c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5
  *(.bev_handler)
  .bev_handler   0xbfc00380       0x10 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib/crt0.o
 
-.dbg_excpt      0xbfc00480        0x8
+.dbg_excpt      0xbfc00480        0x0
                 0xbfc00480                . = (. + DEFINED (_DEBUGGER)?0x8:0x0)
- *fill*         0xbfc00480        0x8 00
 
-.dbg_code       0xbfc02000      0xff0
+.dbg_code       0xbfc02000        0x0
                 0xbfc02000                . = (. + DEFINED (_DEBUGGER)?_DBG_CODE_SIZE:0x0)
- *fill*         0xbfc02000      0xff0 00
 
 .app_excpt      0x9fc01180       0x10
  *(.gen_handler)
@@ -585,55 +579,54 @@ LOAD c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5
 .eh_frame
  *(.eh_frame)
 
-.dbg_data       0xa0000000      0x200
+.dbg_data       0xa0000000        0x0
                 0xa0000000                . = (. + DEFINED (_DEBUGGER)?0x200:0x0)
- *fill*         0xa0000000      0x200 00
 
-.persist        0xa0000200        0x0
-                0xa0000200                _persist_begin = .
+.persist        0xa0000000        0x0
+                0xa0000000                _persist_begin = .
  *(.persist .persist.*)
-                0xa0000200                . = ALIGN (0x4)
-                0xa0000200                _persist_end = .
+                0xa0000000                . = ALIGN (0x4)
+                0xa0000000                _persist_end = .
 
 .eh_frame
  *(.eh_frame)
-                0xa0000200                . = .
-                0xa00081f0                _gp = (ALIGN (0x10) + 0x7ff0)
+                0xa0000000                . = .
+                0xa0007ff0                _gp = (ALIGN (0x10) + 0x7ff0)
 
 .got
  *(.got.plt)
  *(.got)
 
-.sdata          0xa0000200        0x0
-                0xa0000200                _sdata_begin = .
+.sdata          0xa0000000        0x0
+                0xa0000000                _sdata_begin = .
  *(.sdata .sdata.* .gnu.linkonce.s.*)
-                0xa0000200                _sdata_end = .
+                0xa0000000                _sdata_end = .
 
 .lit8
  *(.lit8)
 
 .lit4
  *(.lit4)
-                0xa0000200                . = ALIGN (0x4)
-                0xa0000200                _data_end = .
-                0xa0000200                _bss_begin = .
+                0xa0000000                . = ALIGN (0x4)
+                0xa0000000                _data_end = .
+                0xa0000000                _bss_begin = .
 
-.sbss           0xa0000200        0x0
-                0xa0000200                _sbss_begin = .
+.sbss           0xa0000000        0x0
+                0xa0000000                _sbss_begin = .
  *(.dynsbss)
  *(.sbss .sbss.* .gnu.linkonce.sb.*)
  *(.scommon)
-                0xa0000200                _sbss_end = .
+                0xa0000000                _sbss_end = .
 
-.bss            0xa0000200       0x20
+.bss            0xa0000000       0x20
  *(.dynbss)
  *(COMMON)
- COMMON         0xa0000200       0x20 interpreter.o
-                0xa0000200                command
-                0xa0000220                . = ALIGN (0x4)
-                0xa0000220                . = ALIGN (0x4)
-                0xa0000220                _end = .
-                0xa0000220                _bss_end = .
+ COMMON         0xa0000000       0x20 interpreter.o
+                0xa0000000                command
+                0xa0000020                . = ALIGN (0x4)
+                0xa0000020                . = ALIGN (0x4)
+                0xa0000020                _end = .
+                0xa0000020                _bss_end = .
                 0x00020000                _bmxdudba_address = 0x20000
                 0x00020000                _bmxdupba_address = 0x20000
 
@@ -1016,21 +1009,21 @@ OUTPUT(krnl.elf elf32-tradlittlemips)
 LOAD stack
 LOAD data_init
 
-.stack          0xa0000648      0x400
- .stack         0xa0000648      0x400 stack
+.stack          0xa0000448      0x400
+ .stack         0xa0000448      0x400 stack
 
-.data           0xa0000220      0x3c5
- .data          0xa0000220      0x200 fs_jankyfs.o
- .data          0xa0000420      0x100 andytest.o
- .data          0xa0000520       0x87 ctxswitch.o
- .data          0xa00005a7       0x3e main.o
+.data           0xa0000020      0x3c5
+ .data          0xa0000020      0x200 fs_jankyfs.o
+ .data          0xa0000220      0x100 andytest.o
+ .data          0xa0000320       0x87 ctxswitch.o
+ .data          0xa00003a7       0x3e main.o
 
-.data           0xa00005e8       0x46
- .data          0xa00005e8       0x38 xmips.o
- .data          0xa0000620        0x8 addrmap.o
-                0xa0000620                KRNL_CONTEXT_ADDR
-                0xa0000624                KRNL_STACK_ADDR
- .data          0xa0000628        0x6 drv_sdcard.o
+.data           0xa00003e8       0x46
+ .data          0xa00003e8       0x38 xmips.o
+ .data          0xa0000420        0x8 addrmap.o
+                0xa0000420                KRNL_CONTEXT_ADDR
+                0xa0000424                KRNL_STACK_ADDR
+ .data          0xa0000428        0x6 drv_sdcard.o
 
 .bss%z1         0x00000000        0x0
  .bss           0x00000000        0x0 c:/program files (x86)/microchip/mplab c32 suite/bin/../lib/gcc/pic32mx/4.5.1/../../../../pic32mx/lib/./proc/32MX795F512L\processor.o
