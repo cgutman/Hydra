@@ -20,14 +20,46 @@ main:
 	la $a0, userstart
 	jal krnl_init
 
-userstart:
+consolethread:
+	# Switch TTY
+	# $a0 is a thread arg
+	jal krnl_io_switch_tty
+
 	# Print a hello
 	la $a0, hi
 	li $v0, 4
 	syscall
 
+	# Start the shell
+	jal shell_main
+
+userstart:
+
+	# Start a new thread
+	la $a0, consolethread
+	li $a1, 1
+	li $v0, 21 # create thread
+	syscall
+
+	# Start a new thread
+	la $a0, consolethread
+	li $a1, 2
+	li $v0, 21 # create thread
+	syscall
+
+	# Start a new thread
+	la $a0, consolethread
+	li $a1, 3
+	li $v0, 21 # create thread
+	syscall
+
 	# LED hello
 	jal drv_write_hello_led
+
+
+donothing:
+	jal krnl_yield_thread
+	j donothing
 
 	la $a0, name
 	jal krnl_open_file
@@ -36,8 +68,6 @@ userstart:
 	la $a1, buf
 	li $a2, 16
 	jal krnl_read_file
-
-	#jal shell_main
 
 	# Initialize the mutex
 	li $a0, 0x80004000
