@@ -19,26 +19,6 @@ krnl_io_switch_tty:
 
 # krnl_io_write_int(int)
 krnl_io_write_int:
-	# Save the return address first
-	addi $sp, $sp, -0x4
-	sw $ra, 0($sp)
-
-	# Allocate temporary buffer space for string
-	addi $sp, $sp, -0x20 # 32 characters (NUL included)
-
-	# Decode the integer into our string buffer
-	# $a0 is already loaded
-	addi $a1, $sp, 0x0 # Use stack space as a temp
-	jal numlib_int_to_string
-
-	# Now call the krnl function to write this string out
-	addi $a0, $sp, 0x0
-	jal krnl_io_write_string
-
-	# Restore the stack
-	addi $sp, $sp, 0x20
-	lw $ra, 0($sp)
-	addi $sp, $sp, 0x4
 	jr $ra
 
 # krnl_io_write_float(float)
