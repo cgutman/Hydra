@@ -98,6 +98,21 @@ writeloop:
 
 	# Next character
 	addi $s1, $s1, 0x01
+
+	# Check if it's a LF
+	li $t0, 0xA
+	beq $a1, $t0, lfprint
+
+	# Loop again
+	j writeloop
+
+lfprint:
+	# Write a carriage return
+	addi $a0, $s0, 0x0
+	li $a1, 0xD # CR
+	jal hal_uart_write
+
+	# Loop again
 	j writeloop
 
 writedone:

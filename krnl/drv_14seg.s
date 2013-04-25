@@ -1,7 +1,7 @@
 .globl drv_write_char_led
 .globl drv_write_hello_led
 
-.data
+.text
 alphamap:
 A: .word 0b0111011110000000
 _B: .word 0b0111100010100100
@@ -41,8 +41,6 @@ _6: .word 0b0101111110000000
 _7: .word 0b0100000000010010
 _8: .word 0b0111111110000000
 _9: .word 0b0111101110000000
-
-.text
 
 # int* char_to_addr(char)
 char_to_addr:
