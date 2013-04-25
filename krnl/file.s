@@ -13,8 +13,8 @@
 # void* get_fd_context(int fd)
 get_fd_context:
 	# Look it up in the file table
-	addi $t0, $k1, 0x2A0
-	addi $t1, $k1, 0x2C0
+	addi $t0, $k1, 0x11A0
+	addi $t1, $k1, 0x11C0
 	li $t2, 0x0
 findentry:
 	# Check if we've reached the end
@@ -56,8 +56,8 @@ krnl_open_file:
 	beq $v0, $t0, openfailed
 
 	# It did, so let's add an entry in the file table
-	addi $t0, $k1, 0x2A0
-	addi $t1, $k1, 0x2C0
+	addi $t0, $k1, 0x11A0
+	addi $t1, $k1, 0x11C0
 	li $t3, 0
 findemptyentry:
 	# Check if we've reached the end

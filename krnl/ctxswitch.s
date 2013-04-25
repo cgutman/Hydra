@@ -45,9 +45,9 @@ new_thread_msg:
 # 0x194 Saved user-mode stack pointer
 # 0x198 I/O identifier
 # 0x19C End of user-mode stack
-# 0x29C Beginning of user-mode stack
-# 0x2A0 Start of file table
-# 0x2C0 End of file table
+# 0x119C Beginning of user-mode stack
+# 0x11A0 Start of file table
+# 0x11C0 End of file table
 #
 
 # int krnl_scheduler_init()
@@ -211,13 +211,13 @@ krnl_create_thread:
 	jal krnl_debug
 
 	# Allocate the thread context
-	li $a0, 0x2C0
+	li $a0, 0x11C0
 	jal krnl_paged_alloc
 
 	# Zero the thread context
 	addi $a0, $v0, 0x0
 	li $a1, 0x00
-	li $a2, 0x2C0
+	li $a2, 0x11C0
 	jal memset
 
 	# Write the new thread pointer to v0 to be returned
@@ -253,7 +253,7 @@ krnl_create_thread:
 	sw $s0, 0x80($k1)
 
 	# Write the stack address
-	addi $t1, $k1, 0x29C
+	addi $t1, $k1, 0x119C
 	sw $t1, 0x64($k1)
 
 	# Write the wait object pointer
@@ -274,13 +274,13 @@ krnl_create_initial_user_thread:
 	addi $s0, $a0, 0x0
 
 	# Allocate the thread context
-	li $a0, 0x2C0
+	li $a0, 0x11C0
 	jal krnl_paged_alloc
 
 	# Zero the thread context
 	addi $a0, $v0, 0x0
 	li $a1, 0x00
-	li $a2, 0x2C0
+	li $a2, 0x11C0
 	jal memset
 
 	# Save the old thread
@@ -308,7 +308,7 @@ krnl_create_initial_user_thread:
 	sw $s0, 0x80($k1)
 
 	# Write the stack address
-	addi $t1, $k1, 0x29C
+	addi $t1, $k1, 0x119C
 	sw $t1, 0x64($k1)
 
 	# Write the wait object pointer
@@ -385,7 +385,7 @@ waitthreadret:
 # void krnl_terminate_thread()
 krnl_terminate_thread:
 	la $a0, graceful_term_msg
-	jal krnl_io_write_string
+	jal krnl_debug
 
 	lw $t1, 0x74($k1) # Load the PCR address
 	lw $t0, 0x08($t1) # Load the PCR's thread list head

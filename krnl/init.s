@@ -7,7 +7,7 @@
 # 0x80000000 - 0x800000FF  Kernel context (reserved)
 # 0x80000100 - 0x800002FF  Kernel stack
 # 0x80000300 - 0x80000FFF  Region allocator zone
-# 0x80001000 - 0x80007FFF  Simple Mm's allocator zone
+# 0x80001000 - 0x8001FFFF  Simple Mm's allocator zone
 #
 # Kernel context (stored in $k0):
 #

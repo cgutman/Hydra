@@ -21,7 +21,7 @@ krnl_mm_init:
 	li $t0, 0x80002000 # Load the value of the next ptr
 	sw $t0, 0x30($k0) # Store the next ptr
 
-	li $t0, 0x80008000 # Load the upper bound
+	li $t0, 0x80020000 # Load the upper bound
 	sw $t0, 0x34($k0) # Store the upper bound
 
 	li $v0, 0x0 # Return success
