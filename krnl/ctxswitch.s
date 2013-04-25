@@ -438,6 +438,10 @@ threadkilled:
 		j killthreadloop
 
 killthreaddone:
+	# Free this thread context
+	addi $a0, $k1, 0x0
+	jal krnl_free
+
 	# Switch contexts to allow the dispatcher to select a new thread
 	addi $k1, $t3, 0x0
 	j krnl_schedule_new_thread
@@ -497,6 +501,10 @@ exceptionkilled:
 		j exceptionthreadloop
 
 exceptionthreaddone:
+	# Free this thread context
+	addi $a0, $k1, 0x0
+	jal krnl_free
+
 	# Write the old status value back
 	ori $k0, $k0, 0x2 # EXL bit is set
 	mtc0 $k0, $12

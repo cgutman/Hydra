@@ -15,7 +15,7 @@
 # 0x20 - Region allocator next pointer
 # 0x24 - Region allocator upper bound
 # 0x28 - Memory manager mutex (8 bytes)
-# 0x30 - Memory manager next pointer
+# 0x30 - Memory manager first pointer
 # 0x34 - Memory manager upper bound
 # 0x38 - Mutex contention lock
 # 0x3C - Syscall ordinal limit

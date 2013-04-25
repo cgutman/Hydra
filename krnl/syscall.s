@@ -123,8 +123,12 @@ krnl_syscall_init:
 	la $t0, krnl_io_switch_tty
 	sw $t0, 0x68($t1)
 
+	# Ordinal 27 - krnl_free()
+	la $t0, krnl_free
+	sw $t0, 0x6C($t1)
+
 	# Write the next ordinal as the first invalid one
-	li $t0, 27
+	li $t0, 28
 	sw $t0, 0x3C($k0)
 
 	jr $ra
